@@ -1,0 +1,45 @@
+<template id="InitialBox">
+	<div class="jumbotron">
+		<h1>Welcome to the LAN</h1>
+		<p class="lead">Sign in with your Steam account to get started.</p>
+		<p><img src="https://steamcommunity-a.akamaihd.net/public/images/signinthroughsteam/sits_large_noborder.png" alt="Sign in using Steam"></p>
+	</div>
+</template>
+
+<template id="VoteBox">
+	<div class="jumbotron">
+		<h3 class="lead" align="left">Vote: </h3>
+		<div class="choices">
+		</div>
+		<div class="input-group">
+			<span class="input-group-btn">
+				<button class="btn btn-default" type="button"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></button>
+			</span>
+			<input type="text" class="form-control" placeholder="Add a game...">
+		</div><!-- /input-group -->
+	</div>
+</template>
+
+<template id="VoteBox-choice">
+	<div class="input-group">
+		<span class="input-group-btn">
+			<button class="btn btn-default choicevotes" type="button">+0</button>
+		</span>
+		<input type="text" class="form-control choicename" readonly="readonly" value="error">
+		<span class="input-group-btn">
+			<button class="btn btn-default choicevotebutton" type="button"><span class="glyphicon glyphicon-upload" aria-hidden="true"></span></button><!--
+			<button class="btn btn-default" type="button"><span class="glyphicon glyphicon-download" aria-hidden="true"></span></button>-->
+		</span>
+	</div><!-- /input-group -->
+</template>
+
+<template id="TextBox">
+	<div class="jumbotron">
+		<div class="message" align="left"><h3>Tanner says: Hello!</h3></div>
+	</div>
+</template>
+
+<template id="EmptyBox">
+	<div class="jumbotron">
+	</div>
+</template>
