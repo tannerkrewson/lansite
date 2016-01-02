@@ -20,13 +20,7 @@ VoteBox.prototype.addResponseListeners = function(socket, dispatcher) {
 		//cast the vote based on the index of the choice
 		self.vote(msg.index);
 
-		//TODO:Find new way to to do the below code
-
-		//temporary until i get around to implementing something better
-		dispatcher.users.list.forEach(function(tempUser) {
-			dispatcher.sendCurrentStream(tempUser);
-		});
-
+		dispatcher.sendCurrentStreamToAll();
 	});
 }
 

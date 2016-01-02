@@ -19,14 +19,9 @@ TemplateBox.prototype.addResponseListeners = function(socket, dispatcher) {
 	//haven't tested if this self is necessary
 	var self = this;
 	socket.on(self.unique + '-test', function(msg) {
-		
+
 		//DO SOMETHING
-
-		//send the updated stream to the users
-		dispatcher.users.list.forEach(function(tempUser) {
-			dispatcher.sendCurrentStream(tempUser);
-		});
-
+		dispatcher.sendCurrentStreamToAll();
 	});
 }
 

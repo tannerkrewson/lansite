@@ -53,7 +53,6 @@ Stream.prototype.clearArray = function() {
 
 
 
-
 function Deserializer() {}
 
 Deserializer.JSONtoBox = function(msg) {
@@ -171,7 +170,7 @@ VoteBox.prototype.changeChoiceVotes = function(choiceIndex) {
 
     //because otherwise they would be undefined
     if (this.votes[choiceIndex] === undefined) this.votes[choiceIndex] = 0;
-    
+
     $('#' + this.unique + '-choice' + choiceIndex).find('.choicevotes').html('+' + this.votes[choiceIndex]);
 }
 
@@ -187,7 +186,6 @@ VoteBoxChoice.prototype.addClickEvent = function() {
     var button = $('#' + this.vbu + '-choice' + this.i).find('.choicevotebutton');
 
     button.on('click', function(event) {
-        console.log(self.vbu);
         socket.emit(self.vbu + '-vote', {
             index: self.i,
             voteBoxUnique: self.vbu

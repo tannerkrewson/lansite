@@ -125,6 +125,13 @@ Dispatcher.prototype.sendCurrentStream = function(userToReceiveStream) {
     console.log('Sent stream to ' + userToReceiveStream.unique);
 }
 
+Dispatcher.prototype.sendCurrentStreamToAll = function() {
+    var self = this;
+    this.users.list.forEach(function(tempUser) {
+        self.sendCurrentStream(tempUser);
+    });
+}
+
 Dispatcher.prototype.sendNewBoxToAll = function(box) {
     //loop through all users
     mainDispatcher.users.list.forEach(function(element) {
@@ -190,21 +197,9 @@ io.on('connection', function(socket) {
 
     mainDispatcher.sendCurrentStream(user);
 
-    //handles votes
-    socket.on('vote', function(msg) {
-
-        //search for the corresponding VoteBox using its unique
-        mainStream.boxes.forEach(function(box) {
-            if (box.unique === msg.voteBoxUnique) {
-                //cast the vote based on the index of the choice
-                box.vote(msg.index);
-
-                //temporary until i get around to implementing something better
-                mainDispatcher.users.list.forEach(function(tempUser) {
-                    mainDispatcher.sendCurrentStream(tempUser);
-                });
-            }
-        });
+    //add the socket listeners to the user for all of the current boxes
+    mainStream.boxes.forEach(function(box) {
+        box.addResponseListeners(socket, mainDispatcher);
     });
 
     socket.on('disconnect', function() {
