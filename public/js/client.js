@@ -57,6 +57,7 @@ function Deserializer() {}
 
 Deserializer.JSONtoBox = function(msg) {
     var tempBox;
+
     //window[msg.id] is unnecessary...
     if (msg.id === 'TextBox') {
         tempBox = new window[msg.id](msg.id, msg.unique, msg.text);

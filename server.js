@@ -15,32 +15,47 @@ var socketio = require('socket.io');
 var app = express();
 
 
-//default and custom box loader
+//loads boxes from the /boxes directory and preps for making console commands
 var BoxObjects = {};
 
 require("fs").readdirSync(require("path").join(__dirname, "boxes")).forEach(function(file) {
     var fileNameMinusTheDotJS = file.substr(0, file.length - 3);
 
-    //this prevents it from loading the template
+    //prevent it from loading the template and makes sure the id and filename match (not strictly necessary...)
     if (!fileNameMinusTheDotJS.startsWith('_')) {
-        BoxObjects[fileNameMinusTheDotJS] = require("./boxes/" + file);
+        var tempObject = require("./boxes/" + file);
+        if (tempObject.id === fileNameMinusTheDotJS) {
+            //place each script into the object literal
+            BoxObjects[fileNameMinusTheDotJS.toLowerCase()] = require("./boxes/" + file);
+        };
     }
 });
 
-//console
-var rl = readline.createInterface(process.stdin, process.stdout);
-rl.setPrompt('lansite> ');
-rl.prompt();
-rl.on('line', function(line) {
-    if (line === "stop") rl.close();
-    if (line === "users") console.log(mainDispatcher.users.listAllUsers());
-    if (line === "add initial") mainStream.addBoxAndSend(new BoxObjects['InitialBox'](), mainDispatcher);
-    if (line.startsWith("add text")) mainStream.addBoxAndSend(new BoxObjects['TextBox'](line.substr(9, line.length)), mainDispatcher);
-    if (line === "add vote") console.log('Add choices after command, seperated by spaces.');
-    if (line.startsWith("add vote ")) mainStream.addBoxAndSend(new BoxObjects['VoteBox'](line.substr(9, line.length).split(' ')), mainDispatcher);
-    if (line === "listAllBoxes") console.log(mainStream.listAllBoxes());
-}).on('close', function() {
-    process.exit(0);
+
+//console input
+var stdin = process.openStdin();
+stdin.addListener("data", function(d) {
+    //string of what was entered into the console
+    var line = d.toString().trim();
+
+    //automatic add commands
+    if (line.startsWith('add ')) {
+        var lineArr = line.split(' ');
+        if (lineArr[1].toLowerCase() in BoxObjects) {
+            var lengthBeforeData = lineArr[0].length + lineArr[1].length + 2;
+            var data = line.substr(lengthBeforeData, line.length);
+            console.log(data);
+            mainStream.addBoxAndSend(new BoxObjects[lineArr[1].toLowerCase()](data), mainDispatcher);
+        }
+    }
+
+    //static commands
+    if (line === "stop")
+        process.exit();
+    if (line === "users")
+        console.log(mainDispatcher.users.listAllUsers());
+    if (line === "listAllBoxes")
+        console.log(mainStream.listAllBoxes());
 });
 
 

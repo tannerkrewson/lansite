@@ -7,11 +7,15 @@ var Box = require('./require');
 
 VoteBox.prototype = Object.create(Box.prototype);
 
-function VoteBox(arrayOfChoices) {
-	Box.call(this, 'VoteBox');
-	this.choices = arrayOfChoices;
+function VoteBox(data) {
+	Box.call(this);
+	this.id = VoteBox.id;
+
+	this.choices = data.split(' ');
 	this.votes = [];
 }
+
+VoteBox.id = "VoteBox";
 
 VoteBox.prototype.addResponseListeners = function(socket, dispatcher) {
 	//haven't tested if this self is necessary

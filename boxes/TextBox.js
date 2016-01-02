@@ -8,10 +8,14 @@ var Box = require('./require');
 
 TextBox.prototype = Object.create(Box.prototype);
 
-function TextBox(text) {
-    Box.call(this, 'TextBox');
-    this.text = text;
+function TextBox(data) {
+    Box.call(this);
+    this.id = TextBox.id;
+    
+    this.text = data;
 }
+
+TextBox.id = "TextBox";
 
 TextBox.prototype.changeText = function(text) {
     this.text = text;

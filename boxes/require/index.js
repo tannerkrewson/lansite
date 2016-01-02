@@ -5,9 +5,10 @@
 
 var crypto = require('crypto');
 
-function Box(templateID) {
-	this.id = templateID;
+function Box() {
 	this.unique = crypto.randomBytes(20).toString('hex');
 }
+
+Box.id = "EmptyBox";
 
 module.exports = Box;

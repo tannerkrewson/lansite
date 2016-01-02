@@ -1,5 +1,5 @@
 //
-//  Lansite TemplateBox
+//  Lansite Box Template
 //  By Tanner Krewson
 //
 
@@ -11,9 +11,18 @@ var Box = require('./require');
 
 TemplateBox.prototype = Object.create(Box.prototype);
 
-function TemplateBox() {
-	Box.call(this, 'TemplateBox');
+function TemplateBox(data) {
+	Box.call(this);
+	this.id = TemplateBox.id;
+
+	//data is whatever is after the command in the console.
+	//Example of command entered into console:
+	//
+	//	add templatebox foobarbaz zavraboof
+	//					^----------------->
 }
+
+TemplateBox.id = "TemplateBox";
 
 TemplateBox.prototype.addResponseListeners = function(socket, dispatcher) {
 	//haven't tested if this self is necessary
