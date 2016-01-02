@@ -23,7 +23,9 @@ Stream.prototype.addBox = function(boxToAdd) {
     this.array.push(boxToAdd);
 };
 
-Stream.prototype.showAll = function() {
+Stream.prototype.redrawAllBoxes = function() {
+
+    this.clearScreen();
 
     //this is so that the elements are shown in decsending chonological order
     //slice makes the array copy by val instead of ref
@@ -35,11 +37,8 @@ Stream.prototype.showAll = function() {
 
 };
 
-Stream.prototype.clearAll = function() {
+Stream.prototype.clearScreen = function() {
     var stream = $('#stream');
-
-    //clear the array
-    this.array = [];
 
     //remove all event handlers
     stream.find('*').off();
@@ -47,6 +46,11 @@ Stream.prototype.clearAll = function() {
     //delete all of the html
     stream.empty();
 };
+
+Stream.prototype.clearArray = function() {
+    this.array = [];
+};
+
 
 
 
@@ -183,6 +187,7 @@ VoteBoxChoice.prototype.addClickEvent = function() {
     var button = $('#' + this.vbu + '-choice' + this.i).find('.choicevotebutton');
 
     button.on('click', function(event) {
+        console.log(self.vbu);
         socket.emit(self.vbu + '-vote', {
             index: self.i,
             voteBoxUnique: self.vbu
@@ -201,17 +206,17 @@ var mainStream = new Stream();
 
 //replaces the current stream with the received one
 socket.on('newStream', function(msg) {
-    mainStream.clearAll();
+    mainStream.clearArray();
     msg.forEach(function(element) {
         var tempBox = Deserializer.JSONtoBox(element);
         mainStream.addBox(tempBox);
     });
-    mainStream.showAll();
+    mainStream.redrawAllBoxes();
 });
 
 //adds a single box to the top of the current stream
 socket.on('newBox', function(msg) {
     var tempBox = Deserializer.JSONtoBox(msg);
     mainStream.addBox(tempBox);
-    mainStream.showAll();
+    mainStream.redrawAllBoxes();
 });
