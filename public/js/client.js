@@ -60,7 +60,7 @@ Deserializer.JSONtoBox = function(msg) {
     } else if (msg.id === 'VoteBox') {
         tempBox = new window[msg.id](msg.id, msg.unique, msg.choices, msg.votes);
     } else {
-        tempBox = new window[msg.id](msg.id, msg.unique);
+        tempBox = new Box(msg.id, msg.unique);
     }
     return tempBox;
 }
@@ -97,6 +97,8 @@ Box.prototype.show = function() {
     $('#stream').append(clone).children(':last').attr('id', this.unique);
 
 };
+
+Box.prototype.update = function() {};
 
 
 
@@ -181,7 +183,7 @@ VoteBoxChoice.prototype.addClickEvent = function() {
     var button = $('#' + this.vbu + '-choice' + this.i).find('.choicevotebutton');
 
     button.on('click', function(event) {
-        socket.emit('vote', {
+        socket.emit(self.vbu + '-vote', {
             index: self.i,
             voteBoxUnique: self.vbu
         });
