@@ -1,5 +1,5 @@
 //
-//  Lansite Box Template
+//  Lansite Server Box Template
 //  By Tanner Krewson
 //
 
@@ -19,7 +19,7 @@ function TemplateBox(data) {
 	//Example of command entered into console:
 	//
 	//	add templatebox foobarbaz zavraboof
-	//					^----------------->
+	//                  ^----------------->
 }
 
 TemplateBox.id = "TemplateBox";

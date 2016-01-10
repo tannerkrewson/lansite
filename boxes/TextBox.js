@@ -1,5 +1,5 @@
 //
-//  Lansite TextBox
+//  Lansite Server TextBox
 //  By Tanner Krewson
 //
 

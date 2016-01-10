@@ -1,5 +1,5 @@
 //
-//  Lansite InitialBox
+//  Lansite Server InitialBox
 //  By Tanner Krewson
 //
 

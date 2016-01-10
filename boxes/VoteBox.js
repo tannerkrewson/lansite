@@ -1,5 +1,5 @@
 //
-//  Lansite VoteBox
+//  Lansite Server VoteBox
 //  By Tanner Krewson
 //
 

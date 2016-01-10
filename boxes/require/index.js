@@ -1,5 +1,5 @@
 //
-//  Lansite Box
+//  Lansite Server Box
 //  By Tanner Krewson
 //
 
