@@ -55,25 +55,11 @@ Stream.prototype.clearArray = function() {
 
 function Deserializer() {}
 
-Deserializer.JSONtoBox = function(msg, functionToRun) {
-
-    if (window[msg.id] && typeof window[msg.id] != 'undefined') {
-
-        //this mumbo jumbo checks if the file exists
-        $.ajax({
-            url: 'js/boxes/' + msg.id + '.js',
-            error: function() {
-                functionToRun(false);
-            },
-            success: function() {
-                $.getScript('js/boxes/' + msg.id + '.js', function() {
-                    functionToRun(true);
-                });
-            }
-        });
-
+Deserializer.JSONtoBox = function(json) {
+    if (typeof window[json.id] === 'function') {
+        return new window[json.id](json);
     } else {
-        functionToRun();
+        return new Box(json.id, json.unique);
     }
 }
 
@@ -123,29 +109,20 @@ var mainStream = new Stream();
 
 //replaces the current stream with the received one
 socket.on('newStream', function(msg) {
-    mainStream.clearArray();
-    msg.forEach(function(element) {
-        Deserializer.JSONtoBox(element, function(hasCustomBoxScript) {
-            if (hasCustomBoxScript) {
-                mainStream.addBox(new window[element.id](element));
-            } else {
-                mainStream.addBox(new Box(element.id, element.unique));
-            }
 
-            //TODO: this is very inefficient to have here
-            mainStream.redrawAllBoxes();
-        });
-    });
+    //deletes all boxes currently in the array
+    mainStream.clearArray();
+
+    //add each box in the received stream to our stream
+    msg.forEach(function(element) {
+        mainStream.addBox(Deserializer.JSONtoBox(element));
+    })
+
+    mainStream.redrawAllBoxes();
 });
 
 //adds a single box to the top of the current stream
 socket.on('newBox', function(msg) {
-    Deserializer.JSONtoBox(msg, function(hasCustomBoxScript) {
-        if (hasCustomBoxScript) {
-            mainStream.addBox(new window[msg.id](msg));
-        } else {
-            mainStream.addBox(new Box(msg.id, msg.unique));
-        }
-        mainStream.redrawAllBoxes();
-    });
+    mainStream.addBox(Deserializer.JSONtoBox(msg));
+    mainStream.redrawAllBoxes();
 });
