@@ -14,9 +14,8 @@ Lansite is web app made for smaller LAN parties. It is designed to be a simple, 
 ## Install:
 1. Clone this repo however you prefer.
 2. Open CMD and run: npm install
-3. Then run: npm install socket.io
-4. Finally, to open the server, run: node server.js
-5. Visit localhost:3000 in your browser to test.
+3. Finally, to open the server, run: node server.js
+4. Visit localhost:3000 in your browser to test.
 
 ## Server Console Commands:
 ###NOTE: Box names are case-sensitive.
