@@ -32,33 +32,6 @@ require("fs").readdirSync(require("path").join(__dirname, "boxes")).forEach(func
 });
 
 
-//console input
-var stdin = process.openStdin();
-stdin.addListener("data", function(d) {
-    //string of what was entered into the console
-    var line = d.toString().trim();
-
-    //automatic add commands
-    if (line.startsWith('add ')) {
-        var lineArr = line.split(' ');
-        if (lineArr[1].toLowerCase() in BoxObjects) {
-            var lengthBeforeData = lineArr[0].length + lineArr[1].length + 2;
-            var data = line.substr(lengthBeforeData, line.length);
-            console.log(data);
-            mainStream.addBoxAndSend(new BoxObjects[lineArr[1].toLowerCase()](data), mainDispatcher);
-        }
-    }
-
-    //static commands
-    if (line === "stop")
-        process.exit();
-    if (line === "users")
-        console.log(mainDispatcher.users.listAllUsers());
-    if (line === "listAllBoxes")
-        console.log(mainStream.listAllBoxes());
-});
-
-
 //handlebars setup
 var handlebars = require('express-handlebars').create({
     defaultLayout: 'main'
@@ -212,24 +185,52 @@ function User(socket) {
 //  MAIN CODE
 //
 
-//main object creation
-var mainDispatcher = new Dispatcher();
-var mainStream = new Stream();
+(function() {
+    //console input
+    var stdin = process.openStdin();
+    stdin.addListener("data", function(d) {
+        //string of what was entered into the console
+        var line = d.toString().trim();
 
-//handles users coming and going
-io.on('connection', function(socket) {
-    console.log('User connected');
-    var user = mainDispatcher.users.addNewUser(socket);
+        //automatic add commands
+        if (line.startsWith('add ')) {
+            var lineArr = line.split(' ');
+            if (lineArr[1].toLowerCase() in BoxObjects) {
+                var lengthBeforeData = lineArr[0].length + lineArr[1].length + 2;
+                var data = line.substr(lengthBeforeData, line.length);
+                console.log(data);
+                mainStream.addBoxAndSend(new BoxObjects[lineArr[1].toLowerCase()](data), mainDispatcher);
+            }
+        }
 
-    mainDispatcher.sendCurrentStream(mainStream.boxes, user);
-
-    //add the socket listeners to the user for all of the current boxes
-    mainStream.boxes.forEach(function(box) {
-        box.addResponseListeners(socket, mainDispatcher);
+        //static commands
+        if (line === "stop")
+            process.exit();
+        if (line === "users")
+            console.log(mainDispatcher.users.listAllUsers());
+        if (line === "listAllBoxes")
+            console.log(mainStream.listAllBoxes());
     });
 
-    socket.on('disconnect', function() {
-        console.log('User disconnected');
-        mainDispatcher.users.removeUser(user);
+    //main object creation
+    var mainDispatcher = new Dispatcher();
+    var mainStream = new Stream();
+
+    //handles users coming and going
+    io.on('connection', function(socket) {
+        console.log('User connected');
+        var user = mainDispatcher.users.addNewUser(socket);
+
+        mainDispatcher.sendCurrentStream(mainStream.boxes, user);
+
+        //add the socket listeners to the user for all of the current boxes
+        mainStream.boxes.forEach(function(box) {
+            box.addResponseListeners(socket, mainDispatcher);
+        });
+
+        socket.on('disconnect', function() {
+            console.log('User disconnected');
+            mainDispatcher.users.removeUser(user);
+        });
     });
-});
+})();

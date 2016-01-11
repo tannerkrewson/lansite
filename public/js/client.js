@@ -28,7 +28,7 @@ Stream.prototype.updateBox = function(updatedBox) {
 
     var self = this;
     this.array.forEach(function(box) {
-        if (box.unique === updatedBox.unique){
+        if (box.unique === updatedBox.unique) {
             indexOfUpdatedBox = self.array.indexOf(box);
 
             //replaces box with updatedBox in the same index in the array
@@ -121,30 +121,33 @@ Box.prototype.update = function() {};
 //  MAIN CODE
 //
 
-//main object creation
-var mainStream = new Stream();
+(function() {
+    //main object creation
+    var mainStream = new Stream();
 
-//replaces the current stream with the received one
-socket.on('newStream', function(msg) {
+    //replaces the current stream with the received one
+    socket.on('newStream', function(msg) {
 
-    //deletes all boxes currently in the array
-    mainStream.clearArray();
+        //deletes all boxes currently in the array
+        mainStream.clearArray();
 
-    //add each box in the received stream to our stream
-    msg.forEach(function(element) {
-        mainStream.addBox(Deserializer.JSONtoBox(element));
-    })
+        //add each box in the received stream to our stream
+        msg.forEach(function(element) {
+            mainStream.addBox(Deserializer.JSONtoBox(element));
+        })
 
-    mainStream.redrawAllBoxes();
-});
+        mainStream.redrawAllBoxes();
+    });
 
-//adds a single box to the top of the current stream
-socket.on('newBox', function(msg) {
-    mainStream.addBox(Deserializer.JSONtoBox(msg));
-    mainStream.redrawAllBoxes();
-});
+    //adds a single box to the top of the current stream
+    socket.on('newBox', function(msg) {
+        mainStream.addBox(Deserializer.JSONtoBox(msg));
+        mainStream.redrawAllBoxes();
+    });
 
-//updates the received box in the stream
-socket.on('updateBox', function(msg) {
-    mainStream.updateBox(Deserializer.JSONtoBox(msg));
-});
+    //updates the received box in the stream
+    socket.on('updateBox', function(msg) {
+        mainStream.updateBox(Deserializer.JSONtoBox(msg));
+    });
+
+})();
