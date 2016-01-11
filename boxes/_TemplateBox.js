@@ -25,12 +25,11 @@ function TemplateBox(data) {
 TemplateBox.id = "TemplateBox";
 
 TemplateBox.prototype.addResponseListeners = function(socket, dispatcher) {
-	//haven't tested if this self is necessary
 	var self = this;
 	socket.on(self.unique + '-test', function(msg) {
 
 		//DO SOMETHING
-		dispatcher.sendCurrentStreamToAll();
+		dispatcher.sendUpdatedBoxToAll(self);
 	});
 }
 

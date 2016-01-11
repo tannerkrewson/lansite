@@ -135,23 +135,34 @@ function Dispatcher() {
     this.users = new Users();
 }
 
-Dispatcher.prototype.sendCurrentStream = function(userToReceiveStream) {
-    userToReceiveStream.socket.emit('newStream', mainStream.boxes);
-    console.log('Sent stream to ' + userToReceiveStream.unique);
+Dispatcher.prototype.sendCurrentStream = function(streamDotBoxes, userToReceiveStream) {
+    userToReceiveStream.socket.emit('newStream', streamDotBoxes);
 }
 
-Dispatcher.prototype.sendCurrentStreamToAll = function() {
+Dispatcher.prototype.sendCurrentStreamToAll = function(streamDotBoxes) {
     var self = this;
     this.users.list.forEach(function(tempUser) {
-        self.sendCurrentStream(tempUser);
+        self.sendCurrentStream(streamDotBoxes, tempUser);
     });
+    console.log('Sent stream to all')
 }
 
 Dispatcher.prototype.sendNewBoxToAll = function(box) {
     //loop through all users
-    mainDispatcher.users.list.forEach(function(element) {
+    this.users.list.forEach(function(element) {
         element.socket.emit('newBox', box);
     });
+    console.log('Sent new box to all');
+}
+
+Dispatcher.prototype.sendUpdatedBoxToAll = function(box) {
+
+    //TODO: Make sure the box passed is NOT a new box   
+
+    this.users.list.forEach(function(element) {
+        element.socket.emit('updateBox', box);
+    });
+    console.log('Sent updated box to all');
 }
 
 Dispatcher.prototype.attachListenersToAllUsers = function(box) {
@@ -210,7 +221,7 @@ io.on('connection', function(socket) {
     console.log('User connected');
     var user = mainDispatcher.users.addNewUser(socket);
 
-    mainDispatcher.sendCurrentStream(user);
+    mainDispatcher.sendCurrentStream(mainStream.boxes, user);
 
     //add the socket listeners to the user for all of the current boxes
     mainStream.boxes.forEach(function(box) {

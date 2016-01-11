@@ -23,6 +23,23 @@ Stream.prototype.addBox = function(boxToAdd) {
     this.array.push(boxToAdd);
 };
 
+Stream.prototype.updateBox = function(updatedBox) {
+    var indexOfUpdatedBox;
+
+    var self = this;
+    this.array.forEach(function(box) {
+        if (box.unique === updatedBox.unique){
+            indexOfUpdatedBox = self.array.indexOf(box);
+
+            //replaces box with updatedBox in the same index in the array
+            self.array[indexOfUpdatedBox] = updatedBox;
+        }
+    });
+
+    //update the html with the new data
+    this.array[indexOfUpdatedBox].update();
+};
+
 Stream.prototype.redrawAllBoxes = function() {
 
     this.clearScreen();
@@ -125,4 +142,9 @@ socket.on('newStream', function(msg) {
 socket.on('newBox', function(msg) {
     mainStream.addBox(Deserializer.JSONtoBox(msg));
     mainStream.redrawAllBoxes();
+});
+
+//updates the received box in the stream
+socket.on('updateBox', function(msg) {
+    mainStream.updateBox(Deserializer.JSONtoBox(msg));
 });

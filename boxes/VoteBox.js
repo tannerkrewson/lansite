@@ -18,13 +18,12 @@ function VoteBox(data) {
 VoteBox.id = "VoteBox";
 
 VoteBox.prototype.addResponseListeners = function(socket, dispatcher) {
-	//haven't tested if this self is necessary
 	var self = this;
 	socket.on(self.unique + '-vote', function(msg) {
 		//cast the vote based on the index of the choice
 		self.vote(msg.index);
 
-		dispatcher.sendCurrentStreamToAll();
+		dispatcher.sendUpdatedBoxToAll(self);
 	});
 }
 
