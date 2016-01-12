@@ -14,6 +14,9 @@ var express = require('express');
 var socketio = require('socket.io');
 var app = express();
 
+var Box = require('./boxes/shared/Box');
+var Dispatcher = require('./boxes/shared/Dispatcher');
+
 
 //loads boxes from the /boxes directory and preps for making console commands
 var BoxObjects = {};
@@ -22,7 +25,7 @@ require("fs").readdirSync(require("path").join(__dirname, "boxes")).forEach(func
     var fileNameMinusTheDotJS = file.substr(0, file.length - 3);
 
     //prevent it from loading the template and makes sure the id and filename match (not strictly necessary...)
-    if (!fileNameMinusTheDotJS.startsWith('_')) {
+    if (!fileNameMinusTheDotJS.startsWith('_') && file !== 'shared') {
         var tempObject = require("./boxes/" + file);
         if (tempObject.id === fileNameMinusTheDotJS) {
             //place each script into the object literal
@@ -63,19 +66,28 @@ var io = socketio.listen(app.listen(3000, function() {
 
 function Stream() {
     this.boxes = [];
+    this.users = new Users();
 }
 
-Stream.prototype.addBoxAndSend = function(boxToAdd, dispatcher) {
+Stream.prototype.addBoxAndSend = function(boxToAdd) {
+    this.addBox(boxToAdd);
+    this.sendBox(boxToAdd);
+};
 
-    //add the socket listeners to each user's socket
-    dispatcher.attachListenersToAllUsers(boxToAdd);
-
+Stream.prototype.addBox = function(boxToAdd) {
     //adds the box to the server-side stream
     this.boxes.push(boxToAdd);
+}
+
+Stream.prototype.sendBox = function(boxToSend) {
+    //TODO: Make sure this.boxes contains boxToSend
+
+    //add the socket listeners to each user's socket
+    Dispatcher.attachListenersToAllUsers(boxToSend, this.users);
 
     //sends the box to everyone
-    dispatcher.sendNewBoxToAll(boxToAdd);
-};
+    Dispatcher.sendNewBoxToAll(boxToSend, this.users);
+}
 
 Stream.prototype.showAll = function() {
     //clear all from screen
@@ -100,49 +112,6 @@ Stream.prototype.listAllBoxes = function() {
         result += box.unique + "\n";
     });
     return result;
-}
-
-
-
-function Dispatcher() {
-    this.users = new Users();
-}
-
-Dispatcher.prototype.sendCurrentStream = function(streamDotBoxes, userToReceiveStream) {
-    userToReceiveStream.socket.emit('newStream', streamDotBoxes);
-}
-
-Dispatcher.prototype.sendCurrentStreamToAll = function(streamDotBoxes) {
-    var self = this;
-    this.users.list.forEach(function(tempUser) {
-        self.sendCurrentStream(streamDotBoxes, tempUser);
-    });
-    console.log('Sent stream to all')
-}
-
-Dispatcher.prototype.sendNewBoxToAll = function(box) {
-    //loop through all users
-    this.users.list.forEach(function(element) {
-        element.socket.emit('newBox', box);
-    });
-    console.log('Sent new box to all');
-}
-
-Dispatcher.prototype.sendUpdatedBoxToAll = function(box) {
-
-    //TODO: Make sure the box passed is NOT a new box   
-
-    this.users.list.forEach(function(element) {
-        element.socket.emit('updateBox', box);
-    });
-    console.log('Sent updated box to all');
-}
-
-Dispatcher.prototype.attachListenersToAllUsers = function(box) {
-    var self = this;
-    this.users.list.forEach(function(user) {
-        box.addResponseListeners(user.socket, self);
-    });
 }
 
 
@@ -186,6 +155,13 @@ function User(socket) {
 //
 
 (function() {
+    //main object creation
+    var mainStream = new Stream();
+
+    var initialStream = new Stream();
+    initialStream.addBox(new BoxObjects['initialbox']());
+    initialStream.addBox(new BoxObjects['textbox']('Thanks for coming!'));
+
     //console input
     var stdin = process.openStdin();
     stdin.addListener("data", function(d) {
@@ -199,7 +175,7 @@ function User(socket) {
                 var lengthBeforeData = lineArr[0].length + lineArr[1].length + 2;
                 var data = line.substr(lengthBeforeData, line.length);
                 console.log(data);
-                mainStream.addBoxAndSend(new BoxObjects[lineArr[1].toLowerCase()](data), mainDispatcher);
+                mainStream.addBoxAndSend(new BoxObjects[lineArr[1].toLowerCase()](data));
             }
         }
 
@@ -207,30 +183,27 @@ function User(socket) {
         if (line === "stop")
             process.exit();
         if (line === "users")
-            console.log(mainDispatcher.users.listAllUsers());
+            console.log(Dispatcher.users.listAllUsers());
         if (line === "listAllBoxes")
-            console.log(mainStream.listAllBoxes());
+            console.log(Dispatcher.streams.mainStream.listAllBoxes());
     });
-
-    //main object creation
-    var mainDispatcher = new Dispatcher();
-    var mainStream = new Stream();
 
     //handles users coming and going
     io.on('connection', function(socket) {
         console.log('User connected');
-        var user = mainDispatcher.users.addNewUser(socket);
 
-        mainDispatcher.sendCurrentStream(mainStream.boxes, user);
+        var user = mainStream.users.addNewUser(socket);
+
+        Dispatcher.sendStream(mainStream.boxes, user);
 
         //add the socket listeners to the user for all of the current boxes
         mainStream.boxes.forEach(function(box) {
-            box.addResponseListeners(socket, mainDispatcher);
+            box.addResponseListeners(socket, mainStream.users);
         });
 
         socket.on('disconnect', function() {
             console.log('User disconnected');
-            mainDispatcher.users.removeUser(user);
+            mainStream.users.removeUser(user);
         });
     });
 })();

@@ -3,7 +3,8 @@
 //  By Tanner Krewson
 //
 
-var Box = require('./require');
+var Box = require('./shared/Box');
+var Dispatcher = require('./shared/Dispatcher');
 
 VoteBox.prototype = Object.create(Box.prototype);
 
@@ -17,13 +18,13 @@ function VoteBox(data) {
 
 VoteBox.id = "VoteBox";
 
-VoteBox.prototype.addResponseListeners = function(socket, dispatcher) {
+VoteBox.prototype.addResponseListeners = function(socket, users) {
 	var self = this;
+
 	socket.on(self.unique + '-vote', function(msg) {
 		//cast the vote based on the index of the choice
 		self.vote(msg.index);
-
-		dispatcher.sendUpdatedBoxToAll(self);
+		Dispatcher.sendUpdatedBoxToAll(self, users);
 	});
 }
 

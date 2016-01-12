@@ -3,7 +3,8 @@
 //  By Tanner Krewson
 //
 
-var Box = require('./require');
+var Box = require('./shared/Box');
+var Dispatcher = require('./shared/Dispatcher');
 
 
 InitialBox.prototype = Object.create(Box.prototype);

@@ -6,7 +6,8 @@
 //Ctrl+H replace TemplateBox with what you will be calling your custom box,
 //	and make sure to name your file the same name.
 
-var Box = require('./require');
+var Box = require('./shared/Box');
+var Dispatcher = require('./shared/Dispatcher');
 
 
 TemplateBox.prototype = Object.create(Box.prototype);
