@@ -18,13 +18,20 @@ function VoteBox(data) {
 
 VoteBox.id = "VoteBox";
 
+
 VoteBox.prototype.addResponseListeners = function(socket, users) {
 	var self = this;
 
 	socket.on(self.unique + '-vote', function(msg) {
-		//cast the vote based on the index of the choice
-		self.vote(msg.index);
-		Dispatcher.sendUpdatedBoxToAll(self, users);
+		//check if the user is logged in
+		console.log(msg.userID);
+		if (msg.userID !== undefined) {
+			//cast the vote based on the index of the choice
+			self.vote(msg.index);
+			Dispatcher.sendUpdatedBoxToAll(self, users);
+		} else {
+			console.log('Vote failed');
+		}
 	});
 }
 

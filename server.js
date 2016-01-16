@@ -14,6 +14,9 @@ var express = require('express');
 var socketio = require('socket.io');
 var app = express();
 
+var passport = require('passport');
+var SteamStrategy = require('passport-steam').Strategy;
+
 var Box = require('./boxes/shared/Box');
 var Dispatcher = require('./boxes/shared/Dispatcher');
 
@@ -46,6 +49,16 @@ app.set('view engine', 'handlebars');
 //express stuff
 app.use(express.static(__dirname + '/public'));
 
+//passport setup
+app.use(passport.initialize());
+app.use(passport.session());
+passport.serializeUser(function(user, done) {
+    done(null, user);
+});
+
+passport.deserializeUser(function(obj, done) {
+    done(null, obj);
+});
 
 //url mapping
 app.get('/', function(req, res) {
@@ -187,6 +200,40 @@ function User(socket) {
         if (line === "listAllBoxes")
             console.log(Dispatcher.streams.mainStream.listAllBoxes());
     });
+
+    passport.use(new SteamStrategy({
+            returnURL: 'http://localhost:3000/auth/steam/return',
+            realm: 'http://localhost:3000/',
+            apiKey: 'D7EC6F156DEE943A1DFEC7C6F87A4E22'
+        },
+        function(identifier, profile, done) {
+            profile.identifier = identifier;
+            return done(null, profile);
+        }
+    ));
+
+    app.get('/auth/steam',
+        passport.authenticate('steam'),
+        function(req, res) {});
+
+    app.get('/auth/steam/return',
+        passport.authenticate('steam', {
+            failureRedirect: '/'
+        }),
+        function(req, res) {
+            console.log(req.user.id);
+            res.cookie('userid', req.user.id, {
+                maxAge: 604800000 // Expires in one week
+            });
+            // Successful authentication, redirect home.
+            res.redirect('/');
+        });
+
+    app.get('/logout', function(req, res) {
+        req.logout();
+        res.redirect('/');
+    });
+
 
     //handles users coming and going
     io.on('connection', function(socket) {

@@ -122,6 +122,8 @@ Box.prototype.update = function() {};
 //
 
 (function() {
+    console.log(Cookies.get('userid'));
+
     //main object creation
     var mainStream = new Stream();
 

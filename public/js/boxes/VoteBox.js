@@ -67,6 +67,7 @@ VoteBoxChoice.prototype.addClickEvent = function() {
 
     button.on('click', function(event) {
         socket.emit(self.vbu + '-vote', {
+            userID: Cookies.get('userid'),
             index: self.i,
             voteBoxUnique: self.vbu
         });
