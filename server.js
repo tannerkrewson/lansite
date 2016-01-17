@@ -33,7 +33,7 @@ require("fs").readdirSync(require("path").join(__dirname, "boxes")).forEach(func
         if (tempObject.id === fileNameMinusTheDotJS) {
             //place each script into the object literal
             BoxObjects[fileNameMinusTheDotJS.toLowerCase()] = require("./boxes/" + file);
-        };
+        }
     }
 });
 
@@ -90,7 +90,7 @@ Stream.prototype.addBoxAndSend = function(boxToAdd) {
 Stream.prototype.addBox = function(boxToAdd) {
     //adds the box to the server-side stream
     this.boxes.push(boxToAdd);
-}
+};
 
 Stream.prototype.sendBox = function(boxToSend) {
     //TODO: Make sure this.boxes contains boxToSend
@@ -100,7 +100,7 @@ Stream.prototype.sendBox = function(boxToSend) {
 
     //sends the box to everyone
     Dispatcher.sendNewBoxToAll(boxToSend, this.users);
-}
+};
 
 Stream.prototype.showAll = function() {
     //clear all from screen
@@ -125,7 +125,78 @@ Stream.prototype.listAllBoxes = function() {
         result += box.unique + "\n";
     });
     return result;
-}
+};
+
+Stream.prototype.initializeSteamLogin = function() {
+
+    var self = this;
+    var LoginSuccessHandler = function(req, res, stream) {
+        //this is ran when the user successfully logs into steam
+
+        //generate the user's unique identifier that will be use
+        //    to identify them once they are redirected to the
+        //    main stream.
+        var tempUnique = crypto.randomBytes(20).toString('hex');
+
+        //add the user to the stream and await their return
+        stream.users.addUserOrUpdateUnique(tempUnique, req.user.id, req.user.displayName, req.user._json.realname);
+
+        //set a cookie that will act as the user's login token
+        res.cookie('unique', tempUnique, {
+            maxAge: 604800000 // Expires in one week
+        });
+
+        //redirect home
+        res.redirect('/');
+    };
+
+    passport.use(new SteamStrategy({
+            returnURL: 'http://localhost:3000/auth/steam/return',
+            realm: 'http://localhost:3000/',
+            apiKey: 'API KEY HERE'
+        },
+        function(identifier, profile, done) {
+            //i don't know what any of this does
+            profile.identifier = identifier;
+            return done(null, profile);
+        }
+    ));
+
+    app.get('/auth/steam',
+        passport.authenticate('steam'),
+        function(req, res) {});
+
+    app.get('/auth/steam/return',
+        passport.authenticate('steam', {
+            failureRedirect: '/'
+        }),
+        function(req, res) {
+            LoginSuccessHandler(req, res, self);
+        });
+
+
+    //fake steam login for development purposes
+    if (true) { //TODO: Check a config file for this
+        app.get('/devlogin', function(req, res) {
+            // http://localhost:3000/devlogin?id=IDHERE&displayName=DNAMEHERE&realname=RNAMEHERE
+            req.user = {
+                id: req.query.id,
+                displayName: req.query.displayName,
+                _json: {
+                    realname: req.query.realname
+                }
+            };
+            LoginSuccessHandler(req, res, self);
+        });
+    }
+
+    //pretty sure this is useless
+    app.get('/logout', function(req, res) {
+        req.logout();
+        res.redirect('/');
+    });
+
+};
 
 
 
@@ -202,40 +273,9 @@ function User(unique, id, displayName, realName) {
 
 
 
-function LoginSuccessHandler(req, res, mainStream) {
-    //this is ran when the user successfully logs into steam
+function Console() {}
 
-    //generate the user's unique identifier that will be used
-    //    to identify them once they are redirected to the
-    //    main stream.
-    var tempUnique = crypto.randomBytes(20).toString('hex');
-
-    //add the user to the stream and await their return
-    mainStream.users.addUserOrUpdateUnique(tempUnique, req.user.id, req.user.displayName, req.user._json.realname);
-
-    //set a cookie that will act as the user's login token
-    res.cookie('unique', tempUnique, {
-        maxAge: 604800000 // Expires in one week
-    });
-
-    //redirect home
-    res.redirect('/');
-}
-
-
-
-//
-//  MAIN CODE
-//
-
-(function() {
-    //main object creation
-    var mainStream = new Stream();
-
-    var initialStream = new Stream();
-    initialStream.addBox(new BoxObjects['initialbox']());
-
-    //console input
+Console.addListeners = function(stream) {
     var stdin = process.openStdin();
     stdin.addListener("data", function(d) {
         //string of what was entered into the console
@@ -248,7 +288,7 @@ function LoginSuccessHandler(req, res, mainStream) {
                 var lengthBeforeData = lineArr[0].length + lineArr[1].length + 2;
                 var data = line.substr(lengthBeforeData, line.length);
                 console.log(data);
-                mainStream.addBoxAndSend(new BoxObjects[lineArr[1].toLowerCase()](data));
+                stream.addBoxAndSend(new BoxObjects[lineArr[1].toLowerCase()](data));
             }
         }
 
@@ -256,94 +296,61 @@ function LoginSuccessHandler(req, res, mainStream) {
         if (line === "stop")
             process.exit();
         if (line === "users")
-            console.log(mainStream.users.listAllUsers());
+            console.log(stream.users.listAllUsers());
         if (line === "listAllBoxes")
-            console.log(mainStream.listAllBoxes());
+            console.log(stream.listAllBoxes());
     });
+}
 
-    passport.use(new SteamStrategy({
-            returnURL: 'http://localhost:3000/auth/steam/return',
-            realm: 'http://localhost:3000/',
-            apiKey: 'API KEY HERE'
-        },
-        function(identifier, profile, done) {
-            //i don't know what any of this does
-            profile.identifier = identifier;
-            return done(null, profile);
+
+
+//
+//  MAIN CODE
+//
+
+
+//this stream will be shown to users not logged in
+var initialStream = new Stream();
+initialStream.addBox(new BoxObjects['initialbox']());
+
+var mainStream = new Stream();
+Console.addListeners(mainStream);
+mainStream.initializeSteamLogin();
+
+//handles users coming and going
+io.on('connection', function(socket) {
+    //console.log('Unauthenticated user connected');
+
+    Dispatcher.sendStreamToSocket(initialStream.boxes, socket);
+
+    //sent by client if it detects it has a valid token in it's cookies
+    socket.on('login', function(msg) {
+        var user = mainStream.users.admitUserIfExists(msg.unique, socket);
+
+        //user will be null if it failed to find the user
+        if (user !== null) {
+            console.log('User successfully validated');
+            //send the boxes of the actual stream
+            Dispatcher.sendStream(mainStream.boxes, user);
+
+            //add the socket listeners to the user for all of the current boxes
+            mainStream.boxes.forEach(function(box) {
+                box.addResponseListeners(socket, mainStream.users);
+            });
+
+            socket.on('disconnect', function() {
+                console.log(user.displayName + ' disconnected');
+                user.socket = null;
+                //mainStream.users.removeUser(user);
+            });
+
+        } else {
+            console.log('User validation unsuccessful');
         }
-    ));
-
-    app.get('/auth/steam',
-        passport.authenticate('steam'),
-        function(req, res) {});
-
-    app.get('/auth/steam/return',
-        passport.authenticate('steam', {
-            failureRedirect: '/'
-        }),
-        function(req, res) {
-            LoginSuccessHandler(req, res, mainStream);
-        });
-
-
-    //fake steam login for development purposes
-    if (true) { //TODO: Check a config file for this
-        app.get('/devlogin', function(req, res) {
-            // http://localhost:3000/devlogin?id=IDHERE&displayName=DNAMEHERE&realname=RNAMEHERE
-            req.user = {
-                id: req.query.id,
-                displayName: req.query.displayName,
-                _json: {
-                    realname: req.query.realname
-                }
-            }
-            LoginSuccessHandler(req, res, mainStream);
-        });
-    }
-
-    //pretty sure this is useless
-    app.get('/logout', function(req, res) {
-        req.logout();
-        res.redirect('/');
     });
 
-
-    //handles users coming and going
-    io.on('connection', function(socket) {
-        //console.log('Unauthenticated user connected');
-
-        Dispatcher.sendStreamToSocket(initialStream.boxes, socket);
-
-        //sent by client if it detects it has a valid token in it's cookies
-        socket.on('login', function(msg) {
-            var user = mainStream.users.admitUserIfExists(msg.unique, socket);
-
-            //user will be null if it failed to find the user
-            if (user !== null) {
-                console.log('User successfully validated');
-                //send the boxes of the actual stream
-                Dispatcher.sendStream(mainStream.boxes, user);
-
-                //add the socket listeners to the user for all of the current boxes
-                mainStream.boxes.forEach(function(box) {
-                    box.addResponseListeners(socket, mainStream.users);
-                });
-
-                socket.on('disconnect', function() {
-                    console.log(user.displayName + ' disconnected');
-                    user.socket = null;
-                    //mainStream.users.removeUser(user);
-                });
-
-            } else {
-                console.log('User validation unsuccessful');
-            }
-        });
-
-        socket.on('disconnect', function() {
-            //console.log('Unauthenticated user disconnected');
-            //mainStream.users.removeUser(user);
-        });
+    socket.on('disconnect', function() {
+        //console.log('Unauthenticated user disconnected');
+        //mainStream.users.removeUser(user);
     });
-
-})();
+});
