@@ -113,6 +113,13 @@ Box.prototype.show = function() {
 
 };
 
+Box.emitEvent = function(boxUnique, eventName, data) {
+    socket.emit(boxUnique + '-' + eventName, {
+        unique: Cookies.get('unique'),
+        data: data
+    });
+}
+
 Box.prototype.update = function() {};
 
 
@@ -122,10 +129,15 @@ Box.prototype.update = function() {};
 //
 
 (function() {
-    console.log(Cookies.get('userid'));
-
     //main object creation
     var mainStream = new Stream();
+
+    //attempt to login using the token from cookies, if it exists
+    if (Cookies.get('unique') && Cookies.get('unique') !== '') {
+        socket.emit('login', {
+            unique: Cookies.get('unique')
+        });
+    }
 
     //replaces the current stream with the received one
     socket.on('newStream', function(msg) {

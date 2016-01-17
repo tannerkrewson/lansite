@@ -133,10 +133,44 @@ function Users() {
     this.list = [];
 }
 
-Users.prototype.addNewUser = function(socket) {
-    var tempUser = new User(socket);
+Users.prototype.addUserOrUpdateUnique = function(unique, id, displayName, realName) {
+    for (element of this.list) {
+        //if this user already exists
+        if (element.id === id) {
+            //update their info (i don't update realName)
+            element.unique = unique;
+            element.displayName = displayName;
+
+            //should already be null, just precautionary
+            element.socket = null;
+            return element;
+        }
+    }
+
+    //ran if the user does not already exist
+    var tempUser = new User(unique, id, displayName, realName);
     this.list.push(tempUser);
     return tempUser;
+}
+
+Users.prototype.admitUserIfExists = function(unique, socket) {
+    if (this.checkIfUserExists(unique)) {
+        //user found! update their info
+        element.socket = socket;
+        return element;
+    }
+
+    //user not found
+    return null;
+}
+
+Users.prototype.checkIfUserExists = function(unique) {
+    for (element of this.list) {
+        if (element.unique === unique) {
+            return true;
+        }
+    }
+    return false;
 }
 
 Users.prototype.removeUser = function(userToRemove) {
@@ -147,18 +181,45 @@ Users.prototype.removeUser = function(userToRemove) {
 }
 
 Users.prototype.listAllUsers = function() {
-    var result = '';
+    /*var result = '';
     this.list.forEach(function(element) {
         result += element.unique + "\n";
     });
-    return result;
+    return result;*/
+    return this.list;
 }
 
 
 
-function User(socket) {
-    this.unique = crypto.randomBytes(20).toString('hex');
-    this.socket = socket;
+function User(unique, id, displayName, realName) {
+    this.unique = unique;
+    this.socket = null;
+
+    this.id = id;
+    this.displayName = displayName;
+    this.realName = realName;
+}
+
+
+
+function LoginSuccessHandler(req, res, mainStream) {
+    //this is ran when the user successfully logs into steam
+
+    //generate the user's unique identifier that will be used
+    //    to identify them once they are redirected to the
+    //    main stream.
+    var tempUnique = crypto.randomBytes(20).toString('hex');
+
+    //add the user to the stream and await their return
+    mainStream.users.addUserOrUpdateUnique(tempUnique, req.user.id, req.user.displayName, req.user._json.realname);
+
+    //set a cookie that will act as the user's login token
+    res.cookie('unique', tempUnique, {
+        maxAge: 604800000 // Expires in one week
+    });
+
+    //redirect home
+    res.redirect('/');
 }
 
 
@@ -173,7 +234,6 @@ function User(socket) {
 
     var initialStream = new Stream();
     initialStream.addBox(new BoxObjects['initialbox']());
-    initialStream.addBox(new BoxObjects['textbox']('Thanks for coming!'));
 
     //console input
     var stdin = process.openStdin();
@@ -196,17 +256,18 @@ function User(socket) {
         if (line === "stop")
             process.exit();
         if (line === "users")
-            console.log(Dispatcher.users.listAllUsers());
+            console.log(mainStream.users.listAllUsers());
         if (line === "listAllBoxes")
-            console.log(Dispatcher.streams.mainStream.listAllBoxes());
+            console.log(mainStream.listAllBoxes());
     });
 
     passport.use(new SteamStrategy({
             returnURL: 'http://localhost:3000/auth/steam/return',
             realm: 'http://localhost:3000/',
-            apiKey: 'D7EC6F156DEE943A1DFEC7C6F87A4E22'
+            apiKey: 'API KEY HERE'
         },
         function(identifier, profile, done) {
+            //i don't know what any of this does
             profile.identifier = identifier;
             return done(null, profile);
         }
@@ -221,14 +282,26 @@ function User(socket) {
             failureRedirect: '/'
         }),
         function(req, res) {
-            console.log(req.user.id);
-            res.cookie('userid', req.user.id, {
-                maxAge: 604800000 // Expires in one week
-            });
-            // Successful authentication, redirect home.
-            res.redirect('/');
+            LoginSuccessHandler(req, res, mainStream);
         });
 
+
+    //fake steam login for development purposes
+    if (true) { //TODO: Check a config file for this
+        app.get('/devlogin', function(req, res) {
+            // http://localhost:3000/devlogin?id=IDHERE&displayName=DNAMEHERE&realname=RNAMEHERE
+            req.user = {
+                id: req.query.id,
+                displayName: req.query.displayName,
+                _json: {
+                    realname: req.query.realname
+                }
+            }
+            LoginSuccessHandler(req, res, mainStream);
+        });
+    }
+
+    //pretty sure this is useless
     app.get('/logout', function(req, res) {
         req.logout();
         res.redirect('/');
@@ -237,20 +310,40 @@ function User(socket) {
 
     //handles users coming and going
     io.on('connection', function(socket) {
-        console.log('User connected');
+        //console.log('Unauthenticated user connected');
 
-        var user = mainStream.users.addNewUser(socket);
+        Dispatcher.sendStreamToSocket(initialStream.boxes, socket);
 
-        Dispatcher.sendStream(mainStream.boxes, user);
+        //sent by client if it detects it has a valid token in it's cookies
+        socket.on('login', function(msg) {
+            var user = mainStream.users.admitUserIfExists(msg.unique, socket);
 
-        //add the socket listeners to the user for all of the current boxes
-        mainStream.boxes.forEach(function(box) {
-            box.addResponseListeners(socket, mainStream.users);
+            //user will be null if it failed to find the user
+            if (user !== null) {
+                console.log('User successfully validated');
+                //send the boxes of the actual stream
+                Dispatcher.sendStream(mainStream.boxes, user);
+
+                //add the socket listeners to the user for all of the current boxes
+                mainStream.boxes.forEach(function(box) {
+                    box.addResponseListeners(socket, mainStream.users);
+                });
+
+                socket.on('disconnect', function() {
+                    console.log(user.displayName + ' disconnected');
+                    user.socket = null;
+                    //mainStream.users.removeUser(user);
+                });
+
+            } else {
+                console.log('User validation unsuccessful');
+            }
         });
 
         socket.on('disconnect', function() {
-            console.log('User disconnected');
-            mainStream.users.removeUser(user);
+            //console.log('Unauthenticated user disconnected');
+            //mainStream.users.removeUser(user);
         });
     });
+
 })();

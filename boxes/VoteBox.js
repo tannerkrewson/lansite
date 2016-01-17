@@ -24,10 +24,9 @@ VoteBox.prototype.addResponseListeners = function(socket, users) {
 
 	socket.on(self.unique + '-vote', function(msg) {
 		//check if the user is logged in
-		console.log(msg.userID);
-		if (msg.userID !== undefined) {
+		if (users.checkIfUserExists(msg.unique)) {
 			//cast the vote based on the index of the choice
-			self.vote(msg.index);
+			self.vote(msg.data.index);
 			Dispatcher.sendUpdatedBoxToAll(self, users);
 		} else {
 			console.log('Vote failed');
