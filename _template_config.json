@@ -1,0 +1,12 @@
+//To use this config file, you must remove all comments and rename it to config.json
+{
+    //Port: port in which the server will run off.
+    "port": 3000,
+
+    //Developer Mode: enables features that may be insecure to run in a production situation
+    "developerMode": true,
+
+    //Steam API Key: Grab one for yourself here: http://steamcommunity.com/dev/apikey
+    "steamAPIKey": "YOUR API KEY HERE"
+
+}

@@ -1,3 +1,10 @@
+#    Lansite Specific
+
+/config.json
+
+
+#    Github Node Default
+
 # Logs
 logs
 *.log

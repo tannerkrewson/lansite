@@ -2,28 +2,31 @@
 
 Lansite is web app made for smaller LAN parties. It is designed to be a simple, central information hub for all attendees.
 
-## About:
+## About
 
-* Programmed with JavaScript and Bootstrap on the front end and NodeJS with Express and Handlebars on the back end.
+* Programmed with JavaScript and Bootstrap on the front end and NodeJS with Express, Handlebars, and Passport on the back end.
 * Fully modular plugin system that allows easy creation of custom plugins, called "Boxes".
+* Uses Steam authentication for ease of access and security.
 
-## Included Boxes: 
+## Included Boxes
 * VoteBox: Give your attendees a choice in what game to play next, what to eat, etc.
 * TextBox: Give a quick notice to everyone.
 
-## Install:
+## Install
 1. Clone this repo however you prefer.
 2. Open CMD and run: npm install
-3. Finally, to open the server, run: node server.js
-4. Visit localhost:3000 in your browser to test.
+3. Make a copy of _template_config.json called config.json
+4. Change the settings as you like, and remove the comments.
+5. Finally, to open the server, run: node server.js
+6. Visit localhost:port in your browser to test.
 
-## Server Console Commands:
+## Server Console Commands
 ###NOTE: Box names are case-sensitive.
 * add TextBox [text to display here]
-* add VoteBox [each choice separated by a space here]
+* add VoteBox [each choice separated by a semicolon here]
 * stop
 
-## Custom Box Creation Instructions:
+## Custom Box Creation Instructions
 1. Pick a name. This will be case-sensitive across all files. For this example, we'll call ours "FooBox".
 2. Open "Lansite/views/partials/CustomBoxTemplates.handlebars".
 3. Copy the HTML inside of the comment and paste it below the comment. This will be our box's HTML interface.
