@@ -251,13 +251,23 @@ Users.prototype.removeUser = function(userToRemove) {
     }
 }
 
-Users.prototype.listAllUsers = function() {
+Users.prototype.getAllUsers = function() {
     /*var result = '';
     this.list.forEach(function(element) {
         result += element.unique + "\n";
     });
     return result;*/
     return this.list;
+}
+
+Users.prototype.getOnlineUsers = function() {
+    var result = [];
+    this.list.forEach(function(user) {
+        if (user.isOnline()) {
+            result.push(user);
+        }
+    });
+    return result;
 }
 
 
@@ -269,6 +279,10 @@ function User(unique, id, displayName, realName) {
     this.id = id;
     this.displayName = displayName;
     this.realName = realName;
+}
+
+User.prototype.isOnline = function() {
+    return this.socket !== null;
 }
 
 
@@ -296,7 +310,7 @@ Console.addListeners = function(stream) {
         if (line === "stop")
             process.exit();
         if (line === "users")
-            console.log(stream.users.listAllUsers());
+            console.log(stream.users.getAllUsers());
         if (line === "listAllBoxes")
             console.log(stream.listAllBoxes());
     });

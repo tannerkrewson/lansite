@@ -141,7 +141,6 @@ Box.prototype.update = function() {};
 
     //replaces the current stream with the received one
     socket.on('newStream', function(msg) {
-
         //deletes all boxes currently in the array
         mainStream.clearArray();
 
