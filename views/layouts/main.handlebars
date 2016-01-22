@@ -1,23 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-	{{>head}}
-		<title>Lansite</title>
-    </head>
 
-    <body>
-        <!-- Actual Page -->
-        <div class="container">
-			{{>navbar}}
-            <div id="stream">
-				{{{body}}}
+<head>
+    {{>head}}
+    <title>Lansite</title>
+</head>
+
+<body>
+    <div class="container">
+        {{>navbar}}
+        <br>
+        <br>
+        <div class="row row-offcanvas row-offcanvas-left">
+            {{>sidebar}}
+
+            <div id="stream" class="col-xs-12 col-sm-9">
+
+                {{{body}}}
             </div>
             <footer class="footer">
-                <p>Lansite by Tanner Krewson - <a href="https://github.com/tannerkrewson/lansite">View on Github</a></p>
+                <p>Lansite by Tanner Krewson - <a href="https://github.com/tannerkrewson/lansite">View on Github</a>
+                </p>
             </footer>
-        </div> <!-- /container -->
-    {{>foot}}
-    {{>DefaultBoxTemplates}}
-	{{>CustomBoxTemplates}}
-	</body>
+        </div>
+        <!--/.row-->
+    </div>
+    <!-- /container -->
+    {{>foot}} {{>DefaultBoxTemplates}} {{>CustomBoxTemplates}}
+</body>
+
 </html>
