@@ -51,4 +51,28 @@ Dispatcher.attachListenersToAllUsers = function(box, users) {
 	});
 }
 
+Dispatcher.sendUserListToAll = function(users) {
+
+	//make a new list of the users that doesnt contain the socket
+	//    because that breaks it
+	var tempList = [];
+	users.list.forEach(function(element) {
+		//if the user is online
+		if (element.socket !== null) {
+			tempList.push({
+				id: element.id,
+				unique: element.unique,
+				displayName: element.displayName,
+				realName: element.realName
+			})
+		}
+	});
+	users.list.forEach(function(element) {
+		if (element.socket !== null) {
+			element.socket.emit('updateUsers', tempList);
+		}
+	});
+	console.log('Sent user list to all');
+}
+
 module.exports = Dispatcher;

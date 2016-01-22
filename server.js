@@ -375,10 +375,16 @@ io.on('connection', function(socket) {
                 box.addResponseListeners(socket, mainStream.users);
             });
 
+            //send the updated user list to all users
+            Dispatcher.sendUserListToAll(mainStream.users);
+
             socket.on('disconnect', function() {
                 console.log(user.displayName + ' disconnected');
                 user.socket = null;
                 //mainStream.users.removeUser(user);
+
+                //send the updated user list to all users
+                Dispatcher.sendUserListToAll(mainStream.users);
             });
 
         } else {

@@ -21,28 +21,28 @@ $(document).ready(function() {
 //
 
 function Stream() {
-    this.array = [];
+    this.boxes = [];
 }
 
 Stream.prototype.addBox = function(boxToAdd) {
-    this.array.push(boxToAdd);
+    this.boxes.push(boxToAdd);
 };
 
 Stream.prototype.updateBox = function(updatedBox) {
     var indexOfUpdatedBox;
 
     var self = this;
-    this.array.forEach(function(box) {
+    this.boxes.forEach(function(box) {
         if (box.unique === updatedBox.unique) {
-            indexOfUpdatedBox = self.array.indexOf(box);
+            indexOfUpdatedBox = self.boxes.indexOf(box);
 
             //replaces box with updatedBox in the same index in the array
-            self.array[indexOfUpdatedBox] = updatedBox;
+            self.boxes[indexOfUpdatedBox] = updatedBox;
         }
     });
 
     //update the html with the new data
-    this.array[indexOfUpdatedBox].update();
+    this.boxes[indexOfUpdatedBox].update();
 };
 
 Stream.prototype.redrawAllBoxes = function() {
@@ -51,7 +51,7 @@ Stream.prototype.redrawAllBoxes = function() {
 
     //this is so that the elements are shown in decsending chonological order
     //slice makes the array copy by val instead of ref
-    var tempArray = this.array.slice().reverse();
+    var tempArray = this.boxes.slice().reverse();
     tempArray.forEach(function(element) {
         element.show();
         element.update();
@@ -70,9 +70,37 @@ Stream.prototype.clearScreen = function() {
 };
 
 Stream.prototype.clearArray = function() {
-    this.array = [];
+    this.boxes = [];
 };
 
+
+function Sidebar() {
+    this.users = [];
+}
+
+Sidebar.prototype.replaceUsers = function(listOfUsers) {
+    this.users = listOfUsers;
+};
+
+Sidebar.prototype.updateUsers = function() {
+    this.clearUsers();
+
+    //Add the 'Users:' at the top
+    $('#sidebar ul').append(
+        $('<li>').append('Users:'));
+
+    this.users.forEach(function(user) {
+        $('#sidebar ul').append(
+            $('<li>').append(
+                $('<a>').attr('href', 'http://steamcommunity.com/profiles/' + user.id).append(
+                    $('<span>').attr('class', 'tab').append(user.displayName)
+                )));
+    });
+};
+
+Sidebar.prototype.clearUsers = function() {
+    $('#sidebar ul').empty();
+};
 
 
 function Deserializer() {}
@@ -136,6 +164,7 @@ Box.prototype.update = function() {};
 (function() {
     //main object creation
     var mainStream = new Stream();
+    var mainSidebar = new Sidebar();
 
     //attempt to login using the token from cookies, if it exists
     if (Cookies.get('unique') && Cookies.get('unique') !== '') {
@@ -167,5 +196,12 @@ Box.prototype.update = function() {};
     socket.on('updateBox', function(msg) {
         mainStream.updateBox(Deserializer.JSONtoBox(msg));
     });
+
+    //updates the user list in the sidebar
+    socket.on('updateUsers', function(msg) {
+        mainSidebar.replaceUsers(msg);
+        mainSidebar.updateUsers();
+    });
+
 
 })();
