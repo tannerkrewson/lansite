@@ -84,11 +84,6 @@ Sidebar.prototype.replaceUsers = function(listOfUsers) {
 
 Sidebar.prototype.updateUsers = function() {
     this.clearUsers();
-
-    //Add the 'Users:' at the top
-    $('#sidebar ul').append(
-        $('<li>').append('Users:'));
-
     this.users.forEach(function(user) {
         $('#sidebar ul').append(
             $('<li>').append(
