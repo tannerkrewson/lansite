@@ -63,7 +63,8 @@ Dispatcher.sendUserListToAll = function(users) {
 				id: element.id,
 				unique: element.unique,
 				displayName: element.displayName,
-				realName: element.realName
+				realName: element.realName,
+				isOp: element.isOp
 			})
 		}
 	});

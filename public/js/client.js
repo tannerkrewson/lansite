@@ -85,10 +85,17 @@ Sidebar.prototype.replaceUsers = function(listOfUsers) {
 Sidebar.prototype.updateUsers = function() {
     this.clearUsers();
     this.users.forEach(function(user) {
+        //prepare the string
+        var username = user.displayName;
+        if (user.isOp){
+            username += ' [OP]';
+        }
+
+        //append the string to the list
         $('#sidebar ul').append(
             $('<li>').append(
                 $('<a>').attr('href', 'http://steamcommunity.com/profiles/' + user.id).append(
-                    $('<span>').attr('class', 'tab').append(user.displayName)
+                    $('<span>').attr('class', 'tab').append(username)
                 )));
     });
 };

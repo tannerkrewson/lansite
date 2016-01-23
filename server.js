@@ -293,6 +293,16 @@ Users.prototype.getOnlineUsers = function() {
     return result;
 }
 
+Users.prototype.getOppedUsers = function() {
+    var result = [];
+    this.list.forEach(function(user) {
+        if (user.isOnline()) {
+            result.push(user);
+        }
+    });
+    return result;
+}
+
 
 
 function User(unique, id, displayName, realName) {
@@ -302,10 +312,19 @@ function User(unique, id, displayName, realName) {
     this.id = id;
     this.displayName = displayName;
     this.realName = realName;
+    this.isOp = false;
 }
 
 User.prototype.isOnline = function() {
     return this.socket !== null;
+}
+
+User.prototype.op = function() {
+    this.isOp = true;
+}
+
+User.prototype.deop = function() {
+    this.isOp = false;
 }
 
 
@@ -367,6 +386,16 @@ io.on('connection', function(socket) {
         //user will be null if it failed to find the user
         if (user !== null) {
             console.log('User successfully validated');
+
+            //check to see if we should set the user to OP
+            if (Config.autoOPFirstUser && mainStream.users.list.length === 1) {
+                user.op();
+
+                //var user above seems to be a copy, so we need to do this
+                //    for the above code to take effect
+                //mainStream.users.list[0] = user;
+            }
+
             //send the boxes of the actual stream
             Dispatcher.sendStream(mainStream.boxes, user);
 
