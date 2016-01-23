@@ -76,6 +76,7 @@ Stream.prototype.clearArray = function() {
 
 function Sidebar() {
     this.users = [];
+    this.buttons = [];
 }
 
 Sidebar.prototype.replaceUsers = function(listOfUsers) {
@@ -103,6 +104,33 @@ Sidebar.prototype.updateUsers = function() {
 Sidebar.prototype.clearUsers = function() {
     $('#sidebar ul').empty();
 };
+
+Sidebar.prototype.addButton = function(button){
+    //add button to the array
+    this.buttons.push(button);
+
+    //add button to the sidebar
+    $('#sidebar-buttons').append(
+        $('<button>').attr({
+            type: "button",
+            class: "btn btn-default",
+            id: button.id,
+            'data-toggle': "modal"
+        }).append(button.label)
+        );
+
+    //make tbis button open the modal
+    $('#' + button.id).attr('data-target', '#' + button.id + '-modal');
+
+    //hook up modal to this button
+    //$('#' + button.id + '-modal')
+}
+
+
+function Button(id, label) {
+    this.id = id;
+    this.label = label;
+}
 
 
 function Deserializer() {}
@@ -167,6 +195,9 @@ Box.prototype.update = function() {};
     //main object creation
     var mainStream = new Stream();
     var mainSidebar = new Sidebar();
+
+    mainSidebar.addButton(new Button('VoteButton', 'Request Vote'));
+
 
     //attempt to login using the token from cookies, if it exists
     if (Cookies.get('unique') && Cookies.get('unique') !== '') {

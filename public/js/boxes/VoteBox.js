@@ -46,6 +46,10 @@ VoteBox.prototype.update = function() {
     });
 }
 
+VoteBox.addButtons = function(sidebar) {
+    sidebar.addButton(new Button('VoteButton', 'Request Vote'));
+}
+
 VoteBox.prototype.sendVote = function(choiceUnique, typeOfVote) {
     //this check is to save the server the trouble of having to respond
     //    to phony votes, not strictly neccessary as the server will
