@@ -8,7 +8,9 @@
 
 <body>
     <div class="container">
-        {{>DefaultButtonModals}}
+        {{#each popups}}
+            {{{this.template}}}
+        {{/each}}
         {{>navbar}}
         <br>
         <br>
@@ -27,7 +29,12 @@
         <!--/.row-->
     </div>
     <!-- /container -->
-    {{>foot}} {{>DefaultBoxTemplates}} {{>CustomBoxTemplates}}
+    {{>foot}}
+    {{#each boxes}}
+        {{{this.template}}}
+    {{/each}}
+
+    </script>
 </body>
 
 </html>

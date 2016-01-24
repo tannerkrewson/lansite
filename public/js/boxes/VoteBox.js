@@ -47,7 +47,7 @@ VoteBox.prototype.update = function() {
 }
 
 VoteBox.addButtons = function(sidebar) {
-    sidebar.addButton(new Button('VoteButton', 'Request Vote'));
+    //
 }
 
 VoteBox.prototype.sendVote = function(choiceUnique, typeOfVote) {

@@ -61,10 +61,10 @@ require("fs").readdirSync(require("path").join(__dirname, "boxes")).forEach(func
 
 
 //handlebars setup
-var handlebars = require('express-handlebars').create({
+var hbs = require('express-handlebars').create({
     defaultLayout: 'main'
 });
-app.engine('handlebars', handlebars.engine);
+app.engine('handlebars', hbs.engine);
 app.set('view engine', 'handlebars');
 
 
@@ -83,7 +83,7 @@ passport.deserializeUser(function(obj, done) {
 });
 
 //url mapping
-app.get('/', function(req, res) {
+app.get('/', exposeTemplates, function(req, res) {
     res.render('home');
 });
 
@@ -94,6 +94,47 @@ var io = socketio.listen(app.listen(Config.port, function() {
 }));
 
 
+// sends the box and popup templates to the page
+// TODO: Figure out how to precompile these template, or whatever
+function exposeTemplates(req, res, next) {
+    hbs.getTemplates('templates/').then(function(templates) {
+
+        // Creates an array of templates which are exposed via
+        // `res.locals.templates`.
+        var boxes = Object.keys(templates).map(function(name) {
+            //if the file doesn't start with and is a box template
+            if (!(name.indexOf('/_') > -1) && name.startsWith('boxes/')) {
+                return {
+                    template: templates[name]()
+                };
+            } else {
+                return null;
+            }
+        });
+
+        var popups = Object.keys(templates).map(function(name) {
+            //if the file doesn't start with and is a popup template
+            if (!(name.indexOf('/_') > -1) && name.startsWith('popups/')) {
+                return {
+                    template: templates[name]()
+                };
+            } else {
+                return null;
+            }
+        });
+
+        // Exposes the templates during view rendering.
+        if (boxes.length) {
+            res.locals.boxes = boxes;
+        }
+
+        if (popups.length) {
+            res.locals.popups = popups;
+        }
+
+        setImmediate(next);
+    }).catch(next);
+}
 
 //
 //  OBJECTS

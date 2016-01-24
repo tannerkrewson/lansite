@@ -114,16 +114,13 @@ Sidebar.prototype.addButton = function(button){
         $('<button>').attr({
             type: "button",
             class: "btn btn-default",
-            id: button.id,
+            id: button.id + '-Button',
             'data-toggle': "modal"
         }).append(button.label)
         );
 
     //make tbis button open the modal
-    $('#' + button.id).attr('data-target', '#' + button.id + '-modal');
-
-    //hook up modal to this button
-    //$('#' + button.id + '-modal')
+    $('#' + button.id + '-Button').attr('data-target', '#' + button.id + '-Popup');
 }
 
 
@@ -150,9 +147,6 @@ function PageCommunicator() {}
 PageCommunicator.findTemplate = function(id) {
     //Find the template and grab its content
     var t = document.querySelector('#' + id).content;
-
-    // Example of template population for future use
-    //t.querySelector('img').src = 'logo.png';
 
     //Clone the template
     return document.importNode(t, true);
@@ -196,7 +190,7 @@ Box.prototype.update = function() {};
     var mainStream = new Stream();
     var mainSidebar = new Sidebar();
 
-    mainSidebar.addButton(new Button('VoteButton', 'Request Vote'));
+    mainSidebar.addButton(new Button('VoteBox', 'Request Vote'));
 
 
     //attempt to login using the token from cookies, if it exists
