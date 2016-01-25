@@ -7,6 +7,11 @@ VoteBox.prototype = Object.create(Box.prototype);
 
 function VoteBox(data) {
     Box.call(this, data.id, data.unique);
+    this.updateData(data);
+}
+
+//@Override
+VoteBox.prototype.updateData = function(data){
     this.choices = data.choices;
 }
 

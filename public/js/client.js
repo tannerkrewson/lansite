@@ -29,20 +29,15 @@ Stream.prototype.addBox = function(boxToAdd) {
 };
 
 Stream.prototype.updateBox = function(updatedBox) {
-    var indexOfUpdatedBox;
-
-    var self = this;
-    this.boxes.forEach(function(box) {
-        if (box.unique === updatedBox.unique) {
-            indexOfUpdatedBox = self.boxes.indexOf(box);
-
-            //replaces box with updatedBox in the same index in the array
-            self.boxes[indexOfUpdatedBox] = updatedBox;
+    var i;
+    for (i = this.boxes.length - 1; i >= 0; i--) {
+        if (this.boxes[i].unique === updatedBox.unique) {
+            this.boxes[i].updateData(updatedBox);
+            break;
         }
-    });
-
+    };
     //update the html with the new data
-    this.boxes[indexOfUpdatedBox].update();
+    this.boxes[i].update();
 };
 
 Stream.prototype.redrawAllBoxes = function() {
@@ -221,7 +216,7 @@ Box.prototype.update = function() {};
 
     //updates the received box in the stream
     socket.on('updateBox', function(msg) {
-        mainStream.updateBox(Deserializer.JSONtoBox(msg));
+        mainStream.updateBox(msg);
     });
 
     //updates the user list in the sidebar
