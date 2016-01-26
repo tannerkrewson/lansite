@@ -227,3 +227,9 @@ Box.prototype.update = function() {};
 
 
 })();
+
+function testEvent() {
+    socket.emit('RequestVote', {
+        unique: Cookies.get('unique')
+    });
+}

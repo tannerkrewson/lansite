@@ -45,6 +45,7 @@ try {
 
 //loads boxes from the /boxes directory and preps for making console commands
 var BoxObjects = {};
+var BoxNames = [];
 
 require("fs").readdirSync(require("path").join(__dirname, "boxes")).forEach(function(file) {
     var fileNameMinusTheDotJS = file.substr(0, file.length - 3);
@@ -53,8 +54,11 @@ require("fs").readdirSync(require("path").join(__dirname, "boxes")).forEach(func
     if (!fileNameMinusTheDotJS.startsWith('_') && file !== 'shared') {
         var tempObject = require("./boxes/" + file);
         if (tempObject.id === fileNameMinusTheDotJS) {
+            var boxName = fileNameMinusTheDotJS.toLowerCase();
             //place each script into the object literal
-            BoxObjects[fileNameMinusTheDotJS.toLowerCase()] = require("./boxes/" + file);
+            BoxObjects[boxName] = require("./boxes/" + file);
+            //place each object name in to BoxNames
+            BoxNames.push(boxName);
         }
     }
 });
@@ -143,6 +147,8 @@ function exposeTemplates(req, res, next) {
 function Stream() {
     this.boxes = [];
     this.users = new Users();
+
+    this.requestManager = new RequestManager();
 }
 
 Stream.prototype.addBoxAndSend = function(boxToAdd) {
@@ -302,7 +308,7 @@ Users.prototype.admitUserIfExists = function(unique, socket) {
 Users.prototype.checkIfUserExists = function(unique) {
     for (element of this.list) {
         if (element.unique === unique) {
-            return true;
+            return element;
         }
     }
     return false;
@@ -389,6 +395,13 @@ Console.addListeners = function(stream) {
             }
         }
 
+        if (line === "requests"){
+            var reqman = stream.requestManager;
+            var reqlist = reqman.getRequests();
+            console.log(reqlist);
+            reqman.handleRequest(reqlist[0], true);
+        }
+
         //static commands
         if (line === "stop")
             process.exit();
@@ -397,6 +410,54 @@ Console.addListeners = function(stream) {
         if (line === "listAllBoxes")
             console.log(stream.listAllBoxes());
     });
+}
+
+
+
+function RequestManager() {
+    this.requestList = [];
+}
+
+RequestManager.prototype.addRequest = function(functionToRun, userThatMadeRequest){
+    this.requestList.push(new Request(functionToRun, userThatMadeRequest));
+}
+
+RequestManager.prototype.getRequests = function(){
+    return this.requestList;
+}
+
+RequestManager.prototype.handleRequest = function(request, accepted){
+    if (accepted){
+        request.acceptRequest();
+    } else {
+        //TODO: add denied request function
+    }
+    this.removeRequest(request);
+}
+
+RequestManager.prototype.removeRequest = function(request){
+    var requestIndex = this.requestList.indexOf(request);
+
+    //if request exists
+    if (requestIndex !== -1) {
+        //remove the request from the array
+        this.requestList.splice(requestIndex, 1);
+        return true;
+    } else {
+        return false;
+    };
+}
+
+
+
+function Request(functionToRun, userThatMadeRequest) {
+    this.unique = crypto.randomBytes(20).toString('hex');
+    this.user = userThatMadeRequest;
+    this.functionToRun = functionToRun;
+}
+
+Request.prototype.acceptRequest = function(){
+    this.functionToRun(this.user);
 }
 
 
@@ -443,6 +504,15 @@ io.on('connection', function(socket) {
             //add the socket listeners to the user for all of the current boxes
             mainStream.boxes.forEach(function(box) {
                 box.addResponseListeners(socket, mainStream.users);
+            });
+
+            BoxObjects['votebox'].addRequestListeners(socket, mainStream.users, mainStream.requestManager);
+
+            BoxNames.forEach(function(boxName){
+                var box = BoxObjects[boxName];
+                if (box.addRequestListeners !== undefined){
+                    box.addRequestListeners(socket, mainStream.users, mainStream.requestManager);
+                }
             });
 
             //send the updated user list to all users

@@ -27,6 +27,23 @@ function VoteBox(data) {
 VoteBox.id = "VoteBox";
 
 
+VoteBox.addRequestListeners = function(socket, users, requestManager) {
+	socket.on('RequestVote', function(msg){
+		console.log('Request received');
+		console.log(msg);
+		//check if the user is logged in
+		var user = users.checkIfUserExists(msg.unique);
+		if (user) {
+			requestManager.addRequest(function(){
+				console.log('Request accepted');
+			}, user);
+			//Dispatcher.sendUpdatedBoxToAll(self, users);
+		} else {
+			console.log('Add request failed');
+		}
+	})
+}
+
 VoteBox.prototype.addResponseListeners = function(socket, users) {
 	var self = this;
 	socket.on(self.unique + '-vote', function(msg) {
