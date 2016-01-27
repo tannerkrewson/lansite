@@ -39,3 +39,11 @@ TemplateBox.prototype.update = function() {
 TemplateBox.addButtons = function(sidebar) {
     sidebar.addButton(new Button('TemplateBox', 'Do Something'));
 }
+
+/*  
+	You may send information to the server using the SendToServer
+    object, like so:
+
+	SendToServer.eventFromIndBox(boxUnique, eventName, data);
+	SendToServer.request(requestName, data);
+*/

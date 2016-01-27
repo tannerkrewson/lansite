@@ -48,7 +48,7 @@ VoteBox.prototype.show = function() {
     // http://stackoverflow.com/questions/6524288/jquery-event-for-user-pressing-enter-in-a-textbox
     var addChoiceInput = thisVoteBox.find('.voteadd');
     //when the enter key is press inside the input box
-    addChoiceInput.bind("enterKey",function(e){
+    addChoiceInput.bind("enterKey", function(e){
         //request to add the choice
         self.requestAddChoice(addChoiceInput.val());
         console.log(addChoiceInput.val());
@@ -77,11 +77,8 @@ VoteBox.addButtons = function(sidebar) {
     var button = $('#VoteBox-Popup-submit');
     var self = this;
     button.on('click', function(event) {
-        socket.emit('RequestVote', {
-            unique: Cookies.get('unique'),
-            data: {
-                choices: ["Game1","Game2","Game3"]
-            }
+        SendToServer.request('vote', {
+            choices: ["Game1","Game2","Game3"]
         });
     });
 }
@@ -117,7 +114,7 @@ VoteBox.prototype.sendVote = function(choiceUnique, typeOfVote) {
 
     //if the user has not already upvoted
     if (!userAlreadyVoted) {
-        Box.emitEvent(this.unique, 'vote', {
+        SendToServer.eventFromIndBox(this.unique, 'vote', {
             unique: choiceUnique,
             typeOfVote: typeOfVote
         });
@@ -125,9 +122,7 @@ VoteBox.prototype.sendVote = function(choiceUnique, typeOfVote) {
 }
 
 VoteBox.prototype.requestAddChoice = function(newChoiceName) {
-    /*Box.emitEvent(this.unique, 'add', {
-        name: newChoiceName
-    });*/
+    //TODO: This
 }
 
 

@@ -27,7 +27,7 @@ VoteBox.id = "VoteBox";
 
 
 VoteBox.addRequestListeners = function(socket, stream) {
-	socket.on('RequestVote', function(msg){
+	socket.on('request-vote', function(msg){
 		console.log('Request received');
 		console.log(msg);
 		//check if the user is logged in

@@ -147,10 +147,7 @@ Box.prototype.show = function() {
 };
 
 Box.emitEvent = function(boxUnique, eventName, data) {
-    socket.emit(boxUnique + '-' + eventName, {
-        unique: Cookies.get('unique'),
-        data: data
-    });
+    SendToServer.eventFromIndBox(boxUnique, eventName, data);
 }
 
 Box.findTemplate = function(id) {
@@ -172,61 +169,74 @@ Box.JSONtoBox = function(json) {
 Box.prototype.update = function() {};
 
 
+function SendToServer() {}
+
+SendToServer.generic = function(event, data){
+    socket.emit(event, {
+        unique: Cookies.get('unique'),
+        data: data
+    });
+}
+
+SendToServer.eventFromIndBox = function(boxUnique, eventName, data){
+    SendToServer.generic(boxUnique + '-' + eventName, data);
+}
+
+SendToServer.request = function(requestName, data){
+    SendToServer.generic('request-' + requestName, data);
+}
+
+
 
 //
 //  MAIN CODE
 //
 
-(function() {
-    //main object creation
-    var mainStream = new Stream();
-    var mainSidebar = new Sidebar();
+//main object creation
+var mainStream = new Stream();
+var mainSidebar = new Sidebar();
 
-    //add all buttons once the page has loaded
-    $(document).ready(function() {
-        BoxNames.forEach(function(boxName) {
-            var box = window[boxName];
-            if (box.addButtons !== undefined) {
-                box.addButtons(mainSidebar);
-            }
-        });
+//add all buttons once the page has loaded
+$(document).ready(function() {
+    BoxNames.forEach(function(boxName) {
+        var box = window[boxName];
+        if (box.addButtons !== undefined) {
+            box.addButtons(mainSidebar);
+        }
     });
+});
 
-    //attempt to login using the token from cookies, if it exists
-    if (Cookies.get('unique') && Cookies.get('unique') !== '') {
-        socket.emit('login', {
-            unique: Cookies.get('unique')
-        });
-    }
+//attempt to login using the token from cookies, if it exists
+if (Cookies.get('unique') && Cookies.get('unique') !== '') {
+    SendToServer.generic('login');
+}
 
-    //replaces the current stream with the received one
-    socket.on('newStream', function(msg) {
-        //deletes all boxes currently in the array
-        mainStream.clearArray();
+//replaces the current stream with the received one
+socket.on('newStream', function(msg) {
+    //deletes all boxes currently in the array
+    mainStream.clearArray();
 
-        //add each box in the received stream to our stream
-        msg.forEach(function(element) {
-            mainStream.addBox(Box.JSONtoBox(element));
-        })
+    //add each box in the received stream to our stream
+    msg.forEach(function(element) {
+        mainStream.addBox(Box.JSONtoBox(element));
+    })
 
-        mainStream.redrawAllBoxes();
-    });
+    mainStream.redrawAllBoxes();
+});
 
-    //adds a single box to the top of the current stream
-    socket.on('newBox', function(msg) {
-        mainStream.addBox(Box.JSONtoBox(msg));
-        mainStream.redrawAllBoxes();
-    });
+//adds a single box to the top of the current stream
+socket.on('newBox', function(msg) {
+    mainStream.addBox(Box.JSONtoBox(msg));
+    mainStream.redrawAllBoxes();
+});
 
-    //updates the received box in the stream
-    socket.on('updateBox', function(msg) {
-        mainStream.updateBox(msg);
-    });
+//updates the received box in the stream
+socket.on('updateBox', function(msg) {
+    mainStream.updateBox(msg);
+});
 
-    //updates the user list in the sidebar
-    socket.on('updateUsers', function(msg) {
-        mainSidebar.replaceUsers(msg);
-        mainSidebar.updateUsers();
-    });
-
-})();
+//updates the user list in the sidebar
+socket.on('updateUsers', function(msg) {
+    mainSidebar.replaceUsers(msg);
+    mainSidebar.updateUsers();
+});
