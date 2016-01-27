@@ -6,6 +6,8 @@
 //Ctrl+H replace TemplateBox with what you will be calling your custom box,
 //	and make sure to name your file the same name.
 
+BoxNames.push('TemplateBox');
+
 TemplateBox.prototype = Object.create(Box.prototype);
 
 function TemplateBox(data) {
@@ -32,4 +34,8 @@ TemplateBox.prototype.update = function() {
 
     //Place any custom code here
     
+}
+
+TemplateBox.addButtons = function(sidebar) {
+    sidebar.addButton(new Button('TemplateBox', 'Do Something'));
 }

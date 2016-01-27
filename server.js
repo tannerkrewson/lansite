@@ -156,9 +156,15 @@ Stream.prototype.addBoxAndSend = function(boxToAdd) {
     this.sendBox(boxToAdd);
 };
 
+Stream.prototype.addBoxById = function(boxId, data) {
+    var box = this.addBox(new BoxObjects[boxId.toLowerCase()](data));
+    this.sendBox(box);
+};
+
 Stream.prototype.addBox = function(boxToAdd) {
     //adds the box to the server-side stream
     this.boxes.push(boxToAdd);
+    return boxToAdd;
 };
 
 Stream.prototype.sendBox = function(boxToSend) {
@@ -506,12 +512,11 @@ io.on('connection', function(socket) {
                 box.addResponseListeners(socket, mainStream.users);
             });
 
-            BoxObjects['votebox'].addRequestListeners(socket, mainStream.users, mainStream.requestManager);
-
+            //add static request listeners for each type of box
             BoxNames.forEach(function(boxName){
                 var box = BoxObjects[boxName];
                 if (box.addRequestListeners !== undefined){
-                    box.addRequestListeners(socket, mainStream.users, mainStream.requestManager);
+                    box.addRequestListeners(socket, mainStream);
                 }
             });
 

@@ -3,6 +3,8 @@
 //  By Tanner Krewson
 //
 
+BoxNames.push('TextBox');
+
 TextBox.prototype = Object.create(Box.prototype);
 
 function TextBox(data) {

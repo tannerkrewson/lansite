@@ -3,6 +3,8 @@
 //  By Tanner Krewson
 //
 
+BoxNames.push('VoteBox');
+
 VoteBox.prototype = Object.create(Box.prototype);
 
 function VoteBox(data) {
@@ -11,7 +13,7 @@ function VoteBox(data) {
 }
 
 //@Override
-VoteBox.prototype.updateData = function(data){
+VoteBox.prototype.updateData = function(data) {
     this.choices = data.choices;
 }
 
@@ -52,7 +54,20 @@ VoteBox.prototype.update = function() {
 }
 
 VoteBox.addButtons = function(sidebar) {
-    //
+    sidebar.addButton(new Button('VoteBox', 'Request Vote'));
+
+    //add an event to the submit button of the popup
+    var popup = $('#VoteBox-Popup');
+    var button = $('#VoteBox-Popup-submit');
+    var self = this;
+    button.on('click', function(event) {
+        socket.emit('RequestVote', {
+            unique: Cookies.get('unique'),
+            data: {
+                choices: ["Game1","Game2","Game3"]
+            }
+        });
+    });
 }
 
 VoteBox.prototype.sendVote = function(choiceUnique, typeOfVote) {

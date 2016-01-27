@@ -27,14 +27,23 @@ function VoteBox(data) {
 VoteBox.id = "VoteBox";
 
 
-VoteBox.addRequestListeners = function(socket, users, requestManager) {
+VoteBox.addRequestListeners = function(socket, stream) {
 	socket.on('RequestVote', function(msg){
 		console.log('Request received');
 		console.log(msg);
 		//check if the user is logged in
-		var user = users.checkIfUserExists(msg.unique);
+		var user = stream.users.checkIfUserExists(msg.unique);
 		if (user) {
-			requestManager.addRequest(function(){
+			stream.requestManager.addRequest(function(){
+				//TODO: Not this.
+				var consoleString = '';
+				msg.data.choices.forEach(function(choice){
+					consoleString += choice + ';';
+				})
+				//remove last semicolon
+				consoleString = consoleString.slice(0, -1)
+				console.log(consoleString + '&&');
+				stream.addBoxById('VoteBox', consoleString);
 				console.log('Request accepted');
 			}, user);
 			//Dispatcher.sendUpdatedBoxToAll(self, users);

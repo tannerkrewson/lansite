@@ -9,6 +9,10 @@
 
 var socket = io();
 
+//will contain all the loaded client boxes
+var BoxNames = [];
+
+//bootstrap hamburger button
 $(document).ready(function() {
     $('[data-toggle=offcanvas]').click(function() {
         $('.row-offcanvas').toggleClass('active');
@@ -83,7 +87,7 @@ Sidebar.prototype.updateUsers = function() {
     this.users.forEach(function(user) {
         //prepare the string
         var username = user.displayName;
-        if (user.isOp){
+        if (user.isOp) {
             username += ' [OP]';
         }
 
@@ -100,7 +104,7 @@ Sidebar.prototype.clearUsers = function() {
     $('#sidebar ul').empty();
 };
 
-Sidebar.prototype.addButton = function(button){
+Sidebar.prototype.addButton = function(button) {
     //add button to the array
     this.buttons.push(button);
 
@@ -112,7 +116,7 @@ Sidebar.prototype.addButton = function(button){
             id: button.id + '-Button',
             'data-toggle': "modal"
         }).append(button.label)
-        );
+    );
 
     //make tbis button open the modal
     $('#' + button.id + '-Button').attr('data-target', '#' + button.id + '-Popup');
@@ -185,8 +189,15 @@ Box.prototype.update = function() {};
     var mainStream = new Stream();
     var mainSidebar = new Sidebar();
 
-    mainSidebar.addButton(new Button('VoteBox', 'Request Vote'));
-
+    //add all buttons once the page has loaded
+    $(document).ready(function() {
+        BoxNames.forEach(function(boxName) {
+            var box = window[boxName];
+            if (box.addButtons !== undefined) {
+                box.addButtons(mainSidebar);
+            }
+        });
+    });
 
     //attempt to login using the token from cookies, if it exists
     if (Cookies.get('unique') && Cookies.get('unique') !== '') {
@@ -225,11 +236,4 @@ Box.prototype.update = function() {};
         mainSidebar.updateUsers();
     });
 
-
 })();
-
-function testEvent() {
-    socket.emit('RequestVote', {
-        unique: Cookies.get('unique')
-    });
-}
