@@ -13,15 +13,14 @@ VoteBox.prototype = Object.create(Box.prototype);
 function VoteBox(data) {
 	Box.call(this);
 	this.id = VoteBox.id;
+	
+	this.choices = [];
 
-	//this.choices = data.split(';');
-	this.choices = (function() {
-		var result = [];
-		data.split(';').forEach(function(choice) {
-			result.push(new VoteBoxChoice(choice));
-		});
-		return result;
-	})();
+	if (data.isConsole){
+		this.addChoices(data.line.split(';'));
+	} else {
+		this.addChoices(data.choices);
+	}
 }
 
 VoteBox.id = "VoteBox";
@@ -34,18 +33,13 @@ VoteBox.addRequestListeners = function(socket, stream) {
 		//check if the user is logged in
 		var user = stream.users.checkIfUserExists(msg.unique);
 		if (user) {
-			stream.requestManager.addRequest(function(){
-				//TODO: Not this.
-				var consoleString = '';
-				msg.data.choices.forEach(function(choice){
-					consoleString += choice + ';';
-				})
-				//remove last semicolon
-				consoleString = consoleString.slice(0, -1)
-				console.log(consoleString + '&&');
-				stream.addBoxById('VoteBox', consoleString);
+			stream.requestManager.addRequest(user, function(){
+				var box = stream.addBoxById('VoteBox', msg.data);
+				stream.sendBox(box);
 				console.log('Request accepted');
-			}, user);
+			}, function() {
+				//TODO: Notify user their request has been denied, maybe
+			});
 			//Dispatcher.sendUpdatedBoxToAll(self, users);
 		} else {
 			console.log('Add request failed');
@@ -75,6 +69,16 @@ VoteBox.prototype.addResponseListeners = function(socket, users) {
 			console.log('Vote failed');
 		}
 	});
+}
+
+VoteBox.prototype.addChoices = function(choicesArray){
+	for (var i = 0; i <= choicesArray.length - 1; i++) {
+		this.addChoice(choicesArray[i]);
+	};
+}
+
+VoteBox.prototype.addChoice = function(choiceName){
+	this.choices.push(new VoteBoxChoice(choiceName));
 }
 
 VoteBox.prototype.getIndexOfChoiceByUnique = function(unique) {

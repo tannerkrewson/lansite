@@ -16,11 +16,17 @@ function TemplateBox(data) {
 	Box.call(this);
 	this.id = TemplateBox.id;
 
-	//data is whatever is after the command in the console.
-	//Example of command entered into console:
-	//
-	//	add templatebox foobarbaz zavraboof
-	//                  ^----------------->
+	if (data.isConsole){
+		this.something = data.line.split(';');
+		//data.line will be whatever is after the command in the console.
+		//Example of command entered into console:
+		//
+		//	add templatebox foobarbaz zavraboof
+		//                  ^----------------->
+	} else {
+		//This is if the box was not added via console, for example
+		//    if it was added from a request acceptance.
+	}
 }
 
 TemplateBox.id = "TemplateBox";
@@ -32,6 +38,28 @@ TemplateBox.prototype.addResponseListeners = function(socket, dispatcher) {
 		//DO SOMETHING
 		dispatcher.sendUpdatedBoxToAll(self);
 	});
+}
+
+VoteBox.addRequestListeners = function(socket, stream) {
+	socket.on('RequestVote', function(msg){
+		console.log('Request received');
+		console.log(msg);
+		//check if the user is logged in
+		var user = stream.users.checkIfUserExists(msg.unique);
+		if (user) {
+			stream.requestManager.addRequest(user, function(){
+				//The code within this block will be ran if the
+				//    request is accepted.
+				console.log('Request accepted');
+			}, function(){
+				//The code within this block will be ran if the
+				//    request is denied.
+				console.log('Request denied');
+			});
+		} else {
+			console.log('Add request failed');
+		}
+	})
 }
 
 

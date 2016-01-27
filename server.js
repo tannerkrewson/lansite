@@ -147,7 +147,6 @@ function exposeTemplates(req, res, next) {
 function Stream() {
     this.boxes = [];
     this.users = new Users();
-
     this.requestManager = new RequestManager();
 }
 
@@ -158,23 +157,29 @@ Stream.prototype.addBoxAndSend = function(boxToAdd) {
 
 Stream.prototype.addBoxById = function(boxId, data) {
     var box = this.addBox(new BoxObjects[boxId.toLowerCase()](data));
-    this.sendBox(box);
+    return box;
 };
 
 Stream.prototype.addBox = function(boxToAdd) {
     //adds the box to the server-side stream
     this.boxes.push(boxToAdd);
-    return boxToAdd;
+    return boxToAdd.unique;
 };
 
-Stream.prototype.sendBox = function(boxToSend) {
-    //TODO: Make sure this.boxes contains boxToSend
+Stream.prototype.sendBox = function(uniqueOfBoxToSend) {
+    var index = this.getBoxIndexByUnique(uniqueOfBoxToSend);
 
-    //add the socket listeners to each user's socket
-    Dispatcher.attachListenersToAllUsers(boxToSend, this.users);
+    //if the boxes exists in this stream
+    if (index !== -1){
+        var boxToSend = this.boxes[index];
+        //add the socket listeners to each user's socket
+        Dispatcher.attachListenersToAllUsers(boxToSend, this.users);
 
-    //sends the box to everyone
-    Dispatcher.sendNewBoxToAll(boxToSend, this.users);
+        //sends the box to everyone
+        Dispatcher.sendNewBoxToAll(boxToSend, this.users);
+    } else {
+        console.log('Send box failed: Box does not exist in this stream');
+    }
 };
 
 Stream.prototype.showAll = function() {
@@ -201,6 +206,15 @@ Stream.prototype.listAllBoxes = function() {
     });
     return result;
 };
+
+Stream.prototype.getBoxIndexByUnique = function(boxUnique) {
+    for (var i = this.boxes.length - 1; i >= 0; i--) {
+        if (this.boxes[i].unique === boxUnique) {
+            return i;
+        }
+    };
+    return -1;
+}
 
 Stream.prototype.initializeSteamLogin = function() {
 
@@ -395,8 +409,10 @@ Console.addListeners = function(stream) {
             var lineArr = line.split(' ');
             if (lineArr[1].toLowerCase() in BoxObjects) {
                 var lengthBeforeData = lineArr[0].length + lineArr[1].length + 2;
-                var data = line.substr(lengthBeforeData, line.length);
-                console.log(data);
+                var data = {
+                    isConsole: true,
+                    line: line.substr(lengthBeforeData, line.length)
+                }
                 stream.addBoxAndSend(new BoxObjects[lineArr[1].toLowerCase()](data));
             }
         }
@@ -404,6 +420,7 @@ Console.addListeners = function(stream) {
         if (line === "requests"){
             var reqman = stream.requestManager;
             var reqlist = reqman.getRequests();
+            //TODO: Remove testing code
             console.log(reqlist);
             reqman.handleRequest(reqlist[0], true);
         }
@@ -432,7 +449,7 @@ RequestManager.prototype.getRequests = function(){
     return this.requestList;
 }
 
-RequestManager.prototype.handleRequest = function(request, accepted){
+RequestManager.prototype.handleRequest = function(request, accepted, denied){
     if (accepted){
         request.acceptRequest();
     } else {
@@ -456,14 +473,19 @@ RequestManager.prototype.removeRequest = function(request){
 
 
 
-function Request(functionToRun, userThatMadeRequest) {
+function Request(userThatMadeRequest, acceptFunction, denyFunction) {
     this.unique = crypto.randomBytes(20).toString('hex');
     this.user = userThatMadeRequest;
-    this.functionToRun = functionToRun;
+    this.acceptFunction = acceptFunction;
+    this.denyFunction = denyFunction;
 }
 
 Request.prototype.acceptRequest = function(){
-    this.functionToRun(this.user);
+    this.acceptFunction(this.user);
+}
+
+Request.prototype.denyRequest = function(){
+    this.denyFunction(this.user);
 }
 
 
