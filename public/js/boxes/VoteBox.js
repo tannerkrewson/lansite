@@ -21,6 +21,7 @@ VoteBox.prototype.updateData = function(data) {
 VoteBox.prototype.show = function() {
     //run the function that we're overriding
     Box.prototype.show.call(this);
+    var self = this;
     var thisUnique = this.unique;
 
     var thisVoteBox = $('#' + thisUnique);
@@ -35,7 +36,6 @@ VoteBox.prototype.show = function() {
         thisChoice.attr('id', choiceUnique);
 
         var button = $('#' + choiceUnique).find('.choicevotebutton');
-        var self = this;
         // http://stackoverflow.com/questions/1451009/javascript-infamous-loop-issue
         (function(cu) {
             button.on('click', function(event) {
@@ -43,6 +43,22 @@ VoteBox.prototype.show = function() {
             });
         })(choiceUnique);
     }
+
+    //add handlers to the add game box
+    // http://stackoverflow.com/questions/6524288/jquery-event-for-user-pressing-enter-in-a-textbox
+    var addChoiceInput = thisVoteBox.find('.voteadd');
+    //when the enter key is press inside the input box
+    addChoiceInput.bind("enterKey",function(e){
+        //request to add the choice
+        self.requestAddChoice(addChoiceInput.val());
+        console.log(addChoiceInput.val());
+    });
+    addChoiceInput.keyup(function(e){
+        if(e.keyCode == 13)
+        {
+            $(this).trigger("enterKey");
+        }
+    });
 }
 
 VoteBox.prototype.update = function() {
@@ -108,6 +124,13 @@ VoteBox.prototype.sendVote = function(choiceUnique, typeOfVote) {
     }
 }
 
+VoteBox.prototype.requestAddChoice = function(newChoiceName) {
+    /*Box.emitEvent(this.unique, 'add', {
+        name: newChoiceName
+    });*/
+}
+
+
 VoteBox.prototype.updateChoiceName = function(choice) {
     $('#' + choice.unique).children('.choicename').attr('value', choice.name);
 }
@@ -131,22 +154,3 @@ VoteBox.prototype.getIndexOfChoiceByUnique = function(unique) {
     }
     return -1;
 }
-
-
-/*function VoteBoxChoice(choiceIndex, voteBoxUnique) {
-    this.i = choiceIndex;
-    this.vbu = voteBoxUnique;
-}
-
-VoteBoxChoice.prototype.addClickEvent = function() {
-    // http://stackoverflow.com/questions/20279484/how-to-access-the-correct-this-context-inside-a-callback
-    var self = this;
-    var button = $('#' + this.vbu + '-choice' + this.i).find('.choicevotebutton');
-
-    button.on('click', function(event) {
-        Box.emitEvent(self.vbu, 'vote', {
-            index: self.i,
-            voteBoxUnique: self.vbu
-        });
-    });
-}*/
