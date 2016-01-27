@@ -151,13 +151,13 @@ function Stream() {
 }
 
 Stream.prototype.addBoxAndSend = function(boxToAdd) {
-    this.addBox(boxToAdd);
-    this.sendBox(boxToAdd);
+    var boxUnique = this.addBox(boxToAdd);
+    this.sendBox(boxUnique);
 };
 
 Stream.prototype.addBoxById = function(boxId, data) {
     var box = this.addBox(new BoxObjects[boxId.toLowerCase()](data));
-    return box;
+    return box.unique;
 };
 
 Stream.prototype.addBox = function(boxToAdd) {

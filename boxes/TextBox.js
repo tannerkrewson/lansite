@@ -12,8 +12,11 @@ TextBox.prototype = Object.create(Box.prototype);
 function TextBox(data) {
     Box.call(this);
     this.id = TextBox.id;
-    
-    this.text = data;
+	if (data.isConsole){
+		this.text = data.line;
+	} else {
+		this.text = data.text;
+	}
 }
 
 TextBox.id = "TextBox";
