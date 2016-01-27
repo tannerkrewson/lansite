@@ -34,8 +34,8 @@ VoteBox.addRequestListeners = function(socket, stream) {
 		var user = stream.users.checkIfUserExists(msg.unique);
 		if (user) {
 			stream.requestManager.addRequest(user, function(){
-				var box = stream.addBoxById('VoteBox', msg.data);
-				stream.sendBox(box.unique);
+				var boxUnique = stream.addBoxById('VoteBox', msg.data);
+				stream.sendBox(boxUnique);
 				console.log('Request accepted');
 			}, function() {
 				//TODO: Notify user their request has been denied, maybe

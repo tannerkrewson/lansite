@@ -156,8 +156,8 @@ Stream.prototype.addBoxAndSend = function(boxToAdd) {
 };
 
 Stream.prototype.addBoxById = function(boxId, data) {
-    var box = this.addBox(new BoxObjects[boxId.toLowerCase()](data));
-    return box.unique;
+    var boxUnique = this.addBox(new BoxObjects[boxId.toLowerCase()](data));
+    return boxUnique;
 };
 
 Stream.prototype.addBox = function(boxToAdd) {

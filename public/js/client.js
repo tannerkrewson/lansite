@@ -129,29 +129,6 @@ function Button(id, label) {
 }
 
 
-function Deserializer() {}
-
-Deserializer.JSONtoBox = function(json) {
-    if (typeof window[json.id] === 'function') {
-        return new window[json.id](json);
-    } else {
-        return new Box(json.id, json.unique);
-    }
-}
-
-
-
-function PageCommunicator() {}
-
-PageCommunicator.findTemplate = function(id) {
-    //Find the template and grab its content
-    var t = document.querySelector('#' + id).content;
-
-    //Clone the template
-    return document.importNode(t, true);
-}
-
-
 
 function Box(id, unique) {
     this.id = id;
@@ -164,7 +141,7 @@ Box.prototype.show = function() {
 
     //Append the template to the stream div,
     //  then change the id of the last div in stream (which is the one we just added)
-    var clone = PageCommunicator.findTemplate(this.id)
+    var clone = Box.findTemplate(this.id)
     $('#stream').append(clone).children(':last').attr('id', this.unique);
 
 };
@@ -174,6 +151,22 @@ Box.emitEvent = function(boxUnique, eventName, data) {
         unique: Cookies.get('unique'),
         data: data
     });
+}
+
+Box.findTemplate = function(id) {
+    //Find the template and grab its content
+    var t = document.querySelector('#' + id).content;
+
+    //Clone the template
+    return document.importNode(t, true);
+}
+
+Box.JSONtoBox = function(json) {
+    if (typeof window[json.id] === 'function') {
+        return new window[json.id](json);
+    } else {
+        return new Box(json.id, json.unique);
+    }
 }
 
 Box.prototype.update = function() {};
@@ -213,7 +206,7 @@ Box.prototype.update = function() {};
 
         //add each box in the received stream to our stream
         msg.forEach(function(element) {
-            mainStream.addBox(Deserializer.JSONtoBox(element));
+            mainStream.addBox(Box.JSONtoBox(element));
         })
 
         mainStream.redrawAllBoxes();
@@ -221,7 +214,7 @@ Box.prototype.update = function() {};
 
     //adds a single box to the top of the current stream
     socket.on('newBox', function(msg) {
-        mainStream.addBox(Deserializer.JSONtoBox(msg));
+        mainStream.addBox(Box.JSONtoBox(msg));
         mainStream.redrawAllBoxes();
     });
 

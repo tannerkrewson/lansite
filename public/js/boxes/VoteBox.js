@@ -27,7 +27,7 @@ VoteBox.prototype.show = function() {
     var thisVoteBox = $('#' + thisUnique);
     //loop through each choice and add them
     for (var i = 0; i < this.choices.length; i++) {
-        var choiceTemplate = PageCommunicator.findTemplate('VoteBox-choice');
+        var choiceTemplate = Box.findTemplate('VoteBox-choice');
         var thisChoice = thisVoteBox.find('.choices').append(choiceTemplate).children(':last');
 
         var choiceUnique = this.choices[i].unique;
