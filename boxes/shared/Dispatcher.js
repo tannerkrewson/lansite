@@ -43,10 +43,10 @@ Dispatcher.sendUpdatedBoxToAll = function(box, users) {
 	console.log('Sent updated box to all');
 }
 
-Dispatcher.attachListenersToAllUsers = function(box, users) {
-	users.list.forEach(function(user) {
+Dispatcher.attachListenersToAllUsers = function(box, stream) {
+	stream.users.list.forEach(function(user) {
 		if (user.socket !== null) {
-			box.addResponseListeners(user.socket, users);
+			box.addResponseListeners(user.socket, stream);
 		}
 	});
 }

@@ -173,7 +173,7 @@ Stream.prototype.sendBox = function(uniqueOfBoxToSend) {
     if (index !== -1){
         var boxToSend = this.boxes[index];
         //add the socket listeners to each user's socket
-        Dispatcher.attachListenersToAllUsers(boxToSend, this.users);
+        Dispatcher.attachListenersToAllUsers(boxToSend, this);
 
         //sends the box to everyone
         Dispatcher.sendNewBoxToAll(boxToSend, this.users);
@@ -531,7 +531,7 @@ io.on('connection', function(socket) {
 
             //add the socket listeners to the user for all of the current boxes
             mainStream.boxes.forEach(function(box) {
-                box.addResponseListeners(socket, mainStream.users);
+                box.addResponseListeners(socket, mainStream);
             });
 
             //add static request listeners for each type of box

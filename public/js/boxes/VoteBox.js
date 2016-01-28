@@ -122,7 +122,9 @@ VoteBox.prototype.sendVote = function(choiceUnique, typeOfVote) {
 }
 
 VoteBox.prototype.requestAddChoice = function(newChoiceName) {
-    //TODO: This
+    SendToServer.request('voteaddchoice', {
+        choiceName: newChoiceName
+    });
 }
 
 

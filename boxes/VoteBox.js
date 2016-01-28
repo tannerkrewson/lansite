@@ -40,18 +40,18 @@ VoteBox.addRequestListeners = function(socket, stream) {
 			}, function() {
 				//TODO: Notify user their request has been denied, maybe
 			});
-			//Dispatcher.sendUpdatedBoxToAll(self, users);
+			//Dispatcher.sendUpdatedBoxToAll(self, stream.users);
 		} else {
 			console.log('Add request failed');
 		}
 	})
 }
 
-VoteBox.prototype.addResponseListeners = function(socket, users) {
+VoteBox.prototype.addResponseListeners = function(socket, stream) {
 	var self = this;
 	socket.on(self.unique + '-vote', function(msg) {
 		//check if the user is logged in
-		if (users.checkIfUserExists(msg.unique)) {
+		if (stream.users.checkIfUserExists(msg.unique)) {
 			var indexOfChoice = self.getIndexOfChoiceByUnique(msg.data.unique);
 			//if the choice exists
 			if (indexOfChoice !== -1) {
@@ -64,11 +64,30 @@ VoteBox.prototype.addResponseListeners = function(socket, users) {
 					self.choices[indexOfChoice].voteDown(msg.unique);
 				}
 			}
-			Dispatcher.sendUpdatedBoxToAll(self, users);
+			Dispatcher.sendUpdatedBoxToAll(self, stream.users);
 		} else {
 			console.log('Vote failed');
 		}
 	});
+	socket.on('request-voteaddchoice', function(msg){
+		console.log('Request received');
+		console.log(msg);
+		//check if the user is logged in
+		var user = stream.users.checkIfUserExists(msg.unique);
+		if (user) {
+			stream.requestManager.addRequest(user, function(){
+				console.log(msg);
+				self.addChoice(msg.data.choiceName);
+				Dispatcher.sendUpdatedBoxToAll(self, stream.users);
+				console.log('Request accepted');
+				console.log(self);
+			}, function() {
+				//TODO: Notify user their request has been denied, maybe
+			});
+		} else {
+			console.log('Add request failed');
+		}
+	})
 }
 
 VoteBox.prototype.addChoices = function(choicesArray){
