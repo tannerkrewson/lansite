@@ -22,27 +22,11 @@ VoteBox.prototype.show = function() {
     //run the function that we're overriding
     Box.prototype.show.call(this);
     var self = this;
-    var thisUnique = this.unique;
 
-    var thisVoteBox = $('#' + thisUnique);
-    //loop through each choice and add them
-    for (var i = 0; i < this.choices.length; i++) {
-        var choiceTemplate = Box.findTemplate('VoteBox-choice');
-        var thisChoice = thisVoteBox.find('.choices').append(choiceTemplate).children(':last');
+    var thisVoteBox = $('#' + this.unique);
 
-        var choiceUnique = this.choices[i].unique;
-
-        //add an id to our choice
-        thisChoice.attr('id', choiceUnique);
-
-        var button = $('#' + choiceUnique).find('.choicevotebutton');
-        // http://stackoverflow.com/questions/1451009/javascript-infamous-loop-issue
-        (function(cu) {
-            button.on('click', function(event) {
-                self.sendVote(cu, 'up');
-            });
-        })(choiceUnique);
-    }
+    //add the choices to the html
+    this.redrawChoices();
 
     //add handlers to the add game box
     // http://stackoverflow.com/questions/6524288/jquery-event-for-user-pressing-enter-in-a-textbox
@@ -51,7 +35,7 @@ VoteBox.prototype.show = function() {
     addChoiceInput.bind("enterKey", function(e){
         //request to add the choice
         self.requestAddChoice(addChoiceInput.val());
-        console.log(addChoiceInput.val());
+        addChoiceInput.val('');
     });
     addChoiceInput.keyup(function(e){
         if(e.keyCode == 13)
@@ -62,6 +46,9 @@ VoteBox.prototype.show = function() {
 }
 
 VoteBox.prototype.update = function() {
+    this.redrawChoices();
+
+    //TODO: Go back to this way of doing it
     var self = this;
     this.choices.forEach(function(choice) {
         self.updateChoiceName(choice);
@@ -119,6 +106,43 @@ VoteBox.prototype.sendVote = function(choiceUnique, typeOfVote) {
             typeOfVote: typeOfVote
         });
     }
+}
+
+VoteBox.prototype.redrawChoices = function(){
+    //remove previous choices so we can redisplay all
+    this.removeAllChoicesHTML();
+
+    var self = this;
+    var thisVoteBox = $('#' + this.unique);
+    //loop through each choice and add them
+    for (var i = 0; i < this.choices.length; i++) {
+        var choiceTemplate = Box.findTemplate('VoteBox-choice');
+        var thisChoice = thisVoteBox.find('.choices').append(choiceTemplate).children(':last');
+        var choiceUnique = this.choices[i].unique;
+
+        //add an id to our choice
+        thisChoice.attr('id', choiceUnique);
+
+        var button = $('#' + choiceUnique).find('.choicevotebutton');
+        // http://stackoverflow.com/questions/1451009/javascript-infamous-loop-issue
+        (function(cu) {
+            button.on('click', function(event) {
+                self.sendVote(cu, 'up');
+            });
+        })(choiceUnique);
+
+        var downVoteButton = $('#' + choiceUnique).find('.choicedownvotebutton');
+        // http://stackoverflow.com/questions/1451009/javascript-infamous-loop-issue
+        (function(cu) {
+            downVoteButton.on('click', function(event) {
+                self.sendVote(cu, 'down');
+            });
+        })(choiceUnique);
+    }
+}
+
+VoteBox.prototype.removeAllChoicesHTML = function() {
+    $('#' + this.unique).find('.choices').empty();
 }
 
 VoteBox.prototype.requestAddChoice = function(newChoiceName) {
