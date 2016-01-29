@@ -16,7 +16,7 @@ Dispatcher.sendStreamToSocket = function(boxes, socket) {
 Dispatcher.sendStreamToAll = function(boxes, users) {
 	users.list.forEach(function(tempUser) {
 		if (tempUser.socket !== null) {
-			self.sendStream(boxes, tempUser);
+			Dispatcher.sendStream(boxes, tempUser);
 		}
 	});
 	console.log('Sent stream to all')
@@ -47,6 +47,15 @@ Dispatcher.attachListenersToAllUsers = function(box, stream) {
 	stream.users.list.forEach(function(user) {
 		if (user.socket !== null) {
 			box.addResponseListeners(user.socket, stream);
+		}
+	});
+}
+
+Dispatcher.attachListenersToAllUsersAdmin = function(box, reqMan) {
+	reqMan.adminStream.users.list.forEach(function(user) {
+		//TODO: Unhardcode/
+		if (user.socket !== null && box.id === 'RequestBox') {
+			box.addResponseListenersAdmin(user.socket, reqMan);
 		}
 	});
 }

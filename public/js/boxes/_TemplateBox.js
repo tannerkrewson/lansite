@@ -12,9 +12,15 @@ TemplateBox.prototype = Object.create(Box.prototype);
 
 function TemplateBox(data) {
     Box.call(this, data.id, data.unique);
-
-    //data is a full copy of this box's corresponding server-side object
+    this.updateData(data);
 }
+
+//@Override
+VoteBox.prototype.updateData = function(data) {
+    //Add your constructor here
+    this.foo = data.bar;
+}
+
 
 //@Override
 TemplateBox.prototype.show = function() {

@@ -91,6 +91,11 @@ app.get('/', exposeTemplates, function(req, res) {
     res.render('home');
 });
 
+app.get('/admin', exposeTemplates, function(req, res) {
+    res.render('home');
+});
+
+
 
 //start server
 var io = socketio.listen(app.listen(Config.port, function() {
@@ -144,15 +149,20 @@ function exposeTemplates(req, res, next) {
 //  OBJECTS
 //
 
-function Stream() {
+function Stream(isBasic) {
     this.boxes = [];
     this.users = new Users();
-    this.requestManager = new RequestManager();
+
+    //TODO: Maybe do this another way. Not sure.
+    if (!isBasic){
+        this.requestManager = new RequestManager();
+    }
 }
 
 Stream.prototype.addBoxAndSend = function(boxToAdd) {
     var boxUnique = this.addBox(boxToAdd);
     this.sendBox(boxUnique);
+    return boxUnique;
 };
 
 Stream.prototype.addBoxById = function(boxId, data) {
@@ -166,14 +176,19 @@ Stream.prototype.addBox = function(boxToAdd) {
     return boxToAdd.unique;
 };
 
-Stream.prototype.sendBox = function(uniqueOfBoxToSend) {
+Stream.prototype.sendBox = function(uniqueOfBoxToSend, reqMan) {
     var index = this.getBoxIndexByUnique(uniqueOfBoxToSend);
 
     //if the boxes exists in this stream
     if (index !== -1){
         var boxToSend = this.boxes[index];
         //add the socket listeners to each user's socket
-        Dispatcher.attachListenersToAllUsers(boxToSend, this);
+        //TODO: Unhardcode:
+        if (boxToSend.id === "RequestBox"){
+            Dispatcher.attachListenersToAllUsersAdmin(boxToSend, reqMan);
+        } else {
+            Dispatcher.attachListenersToAllUsers(boxToSend, this);
+        }
 
         //sends the box to everyone
         Dispatcher.sendNewBoxToAll(boxToSend, this.users);
@@ -182,18 +197,14 @@ Stream.prototype.sendBox = function(uniqueOfBoxToSend) {
     }
 };
 
-Stream.prototype.showAll = function() {
-    //clear all from screen
-    this.clearAll();
-
-    //this is so that the elements are shown in decsending chonological order
-    //slice makes the array copy by val instead of ref
-    var tempArray = this.boxes.slice().reverse();
-    tempArray.forEach(function(element) {
-        element.show();
-    });
-
-};
+Stream.prototype.removeBox = function(boxUnique) {
+    var index = this.getBoxIndexByUnique(boxUnique);
+    if (index > -1) {
+        this.boxes.splice(index, 1);
+        return true;
+    }
+    return false;
+}
 
 Stream.prototype.clearAll = function() {
     $('#stream').empty();
@@ -214,6 +225,27 @@ Stream.prototype.getBoxIndexByUnique = function(boxUnique) {
         }
     };
     return -1;
+}
+
+Stream.prototype.prepNewUser = function(userUnique, mainStreamIfAppl) {
+    var user = this.users.checkIfUserExists(userUnique)
+
+    //if the user exists in this stream
+    if (user !== -1) {
+        //send the boxes of the actual stream
+        Dispatcher.sendStream(this.boxes, user);
+
+        //add static request listeners for each type of box
+        for (var i = BoxNames.length - 1; i >= 0; i--) {
+            var box = BoxObjects[BoxNames[i]];
+            if (box.addRequestListeners !== undefined){
+                box.addRequestListeners(user.socket, this);
+            }
+        };
+
+        //send the updated user list to all users
+        Dispatcher.sendUserListToAll(this.users);
+    }
 }
 
 Stream.prototype.initializeSteamLogin = function() {
@@ -322,6 +354,7 @@ Users.prototype.admitUserIfExists = function(unique, socket) {
     }
 
     //user not found
+    //TODO: Switch over to a system thats better than just using null
     return null;
 }
 
@@ -439,27 +472,41 @@ Console.addListeners = function(stream) {
 
 function RequestManager() {
     this.requestList = [];
+    this.adminStream = new Stream(true);
+    this.adminStream.addBox(new BoxObjects['textbox']({
+        text: 'Welcome to the Admin Stream'
+    }));
 }
 
-RequestManager.prototype.addRequest = function(functionToRun, userThatMadeRequest){
-    this.requestList.push(new Request(functionToRun, userThatMadeRequest));
+RequestManager.prototype.addRequest = function(userThatMadeRequest, requestString, acceptFunction, denyFunction){
+    //first we create a request box on the admin stream
+    var boxsUnique = this.adminStream.addBox(new BoxObjects['requestbox']({
+        text: userThatMadeRequest.displayName + ' ' + requestString,
+    }));
+    this.adminStream.sendBox(boxsUnique, this);
+
+    //then we create the request in this manager
+    this.requestList.push(new Request(userThatMadeRequest, requestString, boxsUnique, acceptFunction, denyFunction));
 }
 
 RequestManager.prototype.getRequests = function(){
     return this.requestList;
 }
 
-RequestManager.prototype.handleRequest = function(request, accepted, denied){
-    if (accepted){
-        request.acceptRequest();
-    } else {
-        //TODO: add denied request function
-    }
-    this.removeRequest(request);
+RequestManager.prototype.handleRequest = function(requestUnique, wasAccepted){
+    var request = this.getRequestIfExists(requestUnique);
+    if (request !== null) {
+        if (wasAccepted){
+            request.acceptRequest();
+        } else {
+            request.denyFunction()
+        }
+        this.removeRequest(request);
+    };
 }
 
-RequestManager.prototype.removeRequest = function(request){
-    var requestIndex = this.requestList.indexOf(request);
+RequestManager.prototype.removeRequest = function(requestUnique){
+    var requestIndex = this.getIndexByUnique(requestUnique);
 
     //if request exists
     if (requestIndex !== -1) {
@@ -471,13 +518,39 @@ RequestManager.prototype.removeRequest = function(request){
     };
 }
 
+RequestManager.prototype.getRequestIfExists = function(requestUnique) {
+    var requestIndex = this.getIndexByUnique(requestUnique);
+
+    //if request exists
+    if (requestIndex !== -1) {
+        return this.requestList[requestIndex];
+    } else {
+        return null;
+    };
+
+}
+
+RequestManager.prototype.getIndexByUnique = function(requestUnique) {
+    for (var i = this.requestList.length - 1; i >= 0; i--) {
+        //TODO: Fix discrepancy between box unique and request unique
+        if (this.requestList[i].boxsUnique === requestUnique) {
+            return i;
+        };
+    };
+    return -1;
+}
 
 
-function Request(userThatMadeRequest, acceptFunction, denyFunction) {
+
+function Request(userThatMadeRequest, requestString, boxsUnique, acceptFunction, denyFunction) {
     this.unique = crypto.randomBytes(20).toString('hex');
+
+    this.requestText = requestString.trim();
     this.user = userThatMadeRequest;
     this.acceptFunction = acceptFunction;
     this.denyFunction = denyFunction;
+
+    this.boxsUnique = boxsUnique;
 }
 
 Request.prototype.acceptRequest = function(){
@@ -496,10 +569,10 @@ Request.prototype.denyRequest = function(){
 
 
 //this stream will be shown to users not logged in
-var initialStream = new Stream();
+var initialStream = new Stream(true);
 initialStream.addBox(new BoxObjects['initialbox']());
 
-var mainStream = new Stream();
+var mainStream = new Stream(false);
 Console.addListeners(mainStream);
 mainStream.initializeSteamLogin();
 
@@ -520,30 +593,14 @@ io.on('connection', function(socket) {
             //check to see if we should set the user to OP
             if (Config.autoOPFirstUser && mainStream.users.list.length === 1) {
                 user.op();
-
-                //var user above seems to be a copy, so we need to do this
-                //    for the above code to take effect
-                //mainStream.users.list[0] = user;
             }
 
-            //send the boxes of the actual stream
-            Dispatcher.sendStream(mainStream.boxes, user);
+            mainStream.prepNewUser(user.unique);
 
             //add the socket listeners to the user for all of the current boxes
-            mainStream.boxes.forEach(function(box) {
-                box.addResponseListeners(socket, mainStream);
-            });
-
-            //add static request listeners for each type of box
-            BoxNames.forEach(function(boxName){
-                var box = BoxObjects[boxName];
-                if (box.addRequestListeners !== undefined){
-                    box.addRequestListeners(socket, mainStream);
-                }
-            });
-
-            //send the updated user list to all users
-            Dispatcher.sendUserListToAll(mainStream.users);
+            for (var i = mainStream.boxes.length - 1; i >= 0; i--) {
+                Dispatcher.attachListenersToAllUsers(mainStream.boxes[i], mainStream);
+            };
 
             socket.on('disconnect', function() {
                 console.log(user.displayName + ' disconnected');
@@ -557,6 +614,29 @@ io.on('connection', function(socket) {
         } else {
             console.log('User validation unsuccessful');
         }
+    });
+
+    socket.on('adminStreamLogin', function(msg) {
+        //check to see if the user exists in the main stream and is admin
+        var user = mainStream.users.checkIfUserExists(msg.unique);
+        if (user.isOp){
+            console.log(user.displayName + ' has logged in as admin');
+            var adminStream = mainStream.requestManager.adminStream;
+            var userUnique = msg.unique;
+            adminStream.users.addUserOrUpdateUnique(userUnique);
+            adminStream.users.admitUserIfExists(userUnique, socket);
+            adminStream.prepNewUser(userUnique, mainStream);
+
+            //add the socket listeners to the user for all of the current boxes
+            for (var i = adminStream.boxes.length - 1; i >= 0; i--) {
+                Dispatcher.attachListenersToAllUsersAdmin(adminStream.boxes[i], mainStream.requestManager);
+            };
+
+        } else {
+            console.log(user.displayName + ' failed to log in as admin');
+        }
+
+
     });
 
     socket.on('disconnect', function() {

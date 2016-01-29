@@ -31,16 +31,16 @@ function TemplateBox(data) {
 
 TemplateBox.id = "TemplateBox";
 
-TemplateBox.prototype.addResponseListeners = function(socket, dispatcher) {
+TemplateBox.prototype.addResponseListeners = function(socket, stream) {
 	var self = this;
 	socket.on(self.unique + '-test', function(msg) {
 
 		//DO SOMETHING
-		dispatcher.sendUpdatedBoxToAll(self);
+		Dispatcher.sendUpdatedBoxToAll(self, stream.users);
 	});
 }
 
-VoteBox.addRequestListeners = function(socket, stream) {
+TemplateBox.addRequestListeners = function(socket, stream) {
 	socket.on('RequestVote', function(msg){
 		console.log('Request received');
 		console.log(msg);

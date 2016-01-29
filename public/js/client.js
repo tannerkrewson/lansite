@@ -207,7 +207,9 @@ $(document).ready(function() {
 });
 
 //attempt to login using the token from cookies, if it exists
-if (Cookies.get('unique') && Cookies.get('unique') !== '') {
+if (window.location.href.endsWith('admin')) {
+    SendToServer.generic('adminStreamLogin');
+} else if (Cookies.get('unique') && Cookies.get('unique') !== '') {
     SendToServer.generic('login');
 }
 

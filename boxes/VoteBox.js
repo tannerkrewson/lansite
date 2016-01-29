@@ -33,7 +33,7 @@ VoteBox.addRequestListeners = function(socket, stream) {
 		//check if the user is logged in
 		var user = stream.users.checkIfUserExists(msg.unique);
 		if (user) {
-			stream.requestManager.addRequest(user, function(){
+			stream.requestManager.addRequest(user, 'wants to start a vote', function(){
 				var boxUnique = stream.addBoxById('VoteBox', msg.data);
 				stream.sendBox(boxUnique);
 				console.log('Request accepted');
@@ -75,12 +75,11 @@ VoteBox.prototype.addResponseListeners = function(socket, stream) {
 		//check if the user is logged in
 		var user = stream.users.checkIfUserExists(msg.unique);
 		if (user) {
-			stream.requestManager.addRequest(user, function(){
-				console.log(msg);
+			var choiceName = msg.data.choiceName;
+			stream.requestManager.addRequest(user, 'wants to add ' + choiceName + ' to the vote', function(){
 				self.addChoice(msg.data.choiceName);
 				Dispatcher.sendUpdatedBoxToAll(self, stream.users);
 				console.log('Request accepted');
-				console.log(self);
 			}, function() {
 				//TODO: Notify user their request has been denied, maybe
 			});
