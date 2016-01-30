@@ -150,7 +150,6 @@ VoteBox.prototype.requestAddChoice = function(newChoiceName) {
     });
 }
 
-
 VoteBox.prototype.updateChoiceName = function(choice) {
     $('#' + choice.unique).children('.choicename').attr('value', choice.name);
 }

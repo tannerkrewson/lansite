@@ -62,6 +62,8 @@ VoteBox.prototype.addResponseListeners = function(socket, stream) {
 					//downvote
 					self.choices[indexOfChoice].voteDown(msg.unique);
 				}
+				//sort the array for the client
+				self.sortByVotes();
 			}
 			Dispatcher.sendUpdatedBoxToAll(self, stream.users);
 		} else {
@@ -104,6 +106,19 @@ VoteBox.prototype.getIndexOfChoiceByUnique = function(unique) {
 		}
 	}
 	return -1;
+}
+
+VoteBox.prototype.sortByVotes = function() {
+	//most to least
+    this.choices.sort(function(a,b) {
+        if (a.votes > b.votes){
+        	return -1;
+        } else if (a.votes < b.votes) {
+        	return 1;
+        } else {
+        	return 0;
+        }
+    });
 }
 
 
