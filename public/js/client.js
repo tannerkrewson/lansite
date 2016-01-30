@@ -186,6 +186,10 @@ SendToServer.request = function(requestName, data){
     SendToServer.generic('request-' + requestName, data);
 }
 
+SendToServer.requestFromIndBox = function(boxUnique, requestName, data){
+    SendToServer.generic(boxUnique + '-request-' + requestName, data);
+}
+
 
 
 //

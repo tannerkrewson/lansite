@@ -450,21 +450,15 @@ Console.addListeners = function(stream) {
             }
         }
 
-        if (line === "requests"){
-            var reqman = stream.requestManager;
-            var reqlist = reqman.getRequests();
-            //TODO: Remove testing code
-            console.log(reqlist);
-            reqman.handleRequest(reqlist[0], true);
-        }
-
         //static commands
         if (line === "stop")
             process.exit();
         if (line === "users")
             console.log(stream.users.getAllUsers());
-        if (line === "listAllBoxes")
+        if (line === "boxes")
             console.log(stream.listAllBoxes());
+        if (line === "requests")
+            console.log(stream.requestManager.getRequests());
     });
 }
 
@@ -501,7 +495,7 @@ RequestManager.prototype.handleRequest = function(requestUnique, wasAccepted){
         } else {
             request.denyFunction()
         }
-        this.removeRequest(request);
+    this.removeRequest(requestUnique);
     };
 }
 
@@ -510,7 +504,7 @@ RequestManager.prototype.removeRequest = function(requestUnique){
 
     //if request exists
     if (requestIndex !== -1) {
-        //remove the request from the array
+        //remove the request from the array0
         this.requestList.splice(requestIndex, 1);
         return true;
     } else {

@@ -32,15 +32,10 @@ VoteBox.prototype.show = function() {
     // http://stackoverflow.com/questions/6524288/jquery-event-for-user-pressing-enter-in-a-textbox
     var addChoiceInput = thisVoteBox.find('.voteadd');
     //when the enter key is press inside the input box
-    addChoiceInput.bind("enterKey", function(e){
-        //request to add the choice
-        self.requestAddChoice(addChoiceInput.val());
-        addChoiceInput.val('');
-    });
-    addChoiceInput.keyup(function(e){
-        if(e.keyCode == 13)
-        {
-            $(this).trigger("enterKey");
+    addChoiceInput.bind('keypress', function(e) {
+        if(e.keyCode==13){
+            self.requestAddChoice(addChoiceInput.val());
+            addChoiceInput.val('');
         }
     });
 }
@@ -146,7 +141,7 @@ VoteBox.prototype.removeAllChoicesHTML = function() {
 }
 
 VoteBox.prototype.requestAddChoice = function(newChoiceName) {
-    SendToServer.request('voteaddchoice', {
+    SendToServer.requestFromIndBox(this.unique, 'voteaddchoice', {
         choiceName: newChoiceName
     });
 }

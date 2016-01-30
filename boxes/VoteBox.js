@@ -29,7 +29,6 @@ VoteBox.id = "VoteBox";
 VoteBox.addRequestListeners = function(socket, stream) {
 	socket.on('request-vote', function(msg){
 		console.log('Request received');
-		console.log(msg);
 		//check if the user is logged in
 		var user = stream.users.checkIfUserExists(msg.unique);
 		if (user) {
@@ -69,9 +68,8 @@ VoteBox.prototype.addResponseListeners = function(socket, stream) {
 			console.log('Vote failed');
 		}
 	});
-	socket.on('request-voteaddchoice', function(msg){
+	socket.on(self.unique + '-request-voteaddchoice', function(msg){
 		console.log('Request received');
-		console.log(msg);
 		//check if the user is logged in
 		var user = stream.users.checkIfUserExists(msg.unique);
 		if (user) {
