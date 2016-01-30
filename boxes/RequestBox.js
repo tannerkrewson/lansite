@@ -50,10 +50,6 @@ RequestBox.prototype.addAdminResponseListeners = function(socket, reqMan) {
 				reqMan.handleRequest(reqUnique, wasAccepted);
 			};
 		}
-		//remove this box since we're done with it
-		adminStream.removeBox(self.unique);
-		//send the new adminStream with removed box
-        Dispatcher.sendStreamToAll(adminStream.boxes, adminStream.users);
 	});
 }
 

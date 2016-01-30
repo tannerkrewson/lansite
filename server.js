@@ -475,7 +475,6 @@ RequestManager.prototype.addRequest = function(userThatMadeRequest, requestStrin
     //since users can only have one request open at a time
     //check to see if they have a request open already
     var prevReq = this.userHasOpenRequest(userThatMadeRequest.unique);
-    console.log(prevReq);
     if (prevReq !== null) {
         //deny their open request
         this.handleRequest(prevReq, false);
@@ -509,7 +508,6 @@ RequestManager.prototype.handleRequest = function(requestUnique, wasAccepted){
 
 RequestManager.prototype.removeRequest = function(requestUnique){
     var requestIndex = this.getIndexByUnique(requestUnique);
-    console.log('Request exists? ' + requestIndex);
     //if request exists
     if (requestIndex !== -1) {
         //remove the request from the array

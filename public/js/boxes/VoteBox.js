@@ -34,8 +34,12 @@ VoteBox.prototype.show = function() {
     //when the enter key is press inside the input box
     addChoiceInput.bind('keypress', function(e) {
         if(e.keyCode==13){
-            self.requestAddChoice(addChoiceInput.val());
-            addChoiceInput.val('');
+            //check to make sure they typed something
+            var choiceRequest = addChoiceInput.val().trim();
+            if (choiceRequest !== ''){
+                self.requestAddChoice(choiceRequest);
+                addChoiceInput.val('');
+            }
         }
     });
 }
