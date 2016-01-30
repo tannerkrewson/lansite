@@ -472,7 +472,16 @@ function RequestManager() {
 }
 
 RequestManager.prototype.addRequest = function(userThatMadeRequest, requestString, acceptFunction, denyFunction){
-    //first we create a request box on the admin stream
+    //since users can only have one request open at a time
+    //check to see if they have a request open already
+    var prevReq = this.userHasOpenRequest(userThatMadeRequest.unique);
+    console.log(prevReq);
+    if (prevReq !== null) {
+        //deny their open request
+        this.handleRequest(prevReq, false);
+    }
+
+    //create a request box on the admin stream
     var boxsUnique = this.adminStream.addBox(new BoxObjects['requestbox']({
         text: userThatMadeRequest.displayName + ' ' + requestString,
     }));
@@ -500,11 +509,15 @@ RequestManager.prototype.handleRequest = function(requestUnique, wasAccepted){
 
 RequestManager.prototype.removeRequest = function(requestUnique){
     var requestIndex = this.getIndexByUnique(requestUnique);
-
+    console.log('Request exists? ' + requestIndex);
     //if request exists
     if (requestIndex !== -1) {
-        //remove the request from the array0
+        //remove the request from the array
         this.requestList.splice(requestIndex, 1);
+        //remove this box since we're done with it
+        this.adminStream.removeBox(requestUnique);
+        //send the new adminStream with removed box
+        Dispatcher.sendStreamToAll(this.adminStream.boxes, this.adminStream.users);
         return true;
     } else {
         return false;
@@ -525,18 +538,26 @@ RequestManager.prototype.getRequestIfExists = function(requestUnique) {
 
 RequestManager.prototype.getIndexByUnique = function(requestUnique) {
     for (var i = this.requestList.length - 1; i >= 0; i--) {
-        //TODO: Fix discrepancy between box unique and request unique
-        if (this.requestList[i].boxsUnique === requestUnique) {
+        if (this.requestList[i].unique === requestUnique) {
             return i;
         };
     };
     return -1;
 }
 
+RequestManager.prototype.userHasOpenRequest = function(userUnique) {
+    for (var i = this.requestList.length - 1; i >= 0; i--) {
+        if (this.requestList[i].user.unique === userUnique) {
+            return this.requestList[i].unique;
+        };
+    };
+    return null;
+}
+
 
 
 function Request(userThatMadeRequest, requestString, boxsUnique, acceptFunction, denyFunction) {
-    this.unique = crypto.randomBytes(20).toString('hex');
+    this.unique = boxsUnique;
 
     this.requestText = requestString.trim();
     this.user = userThatMadeRequest;
