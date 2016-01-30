@@ -12,6 +12,7 @@ RequestBox.prototype = Object.create(Box.prototype);
 function RequestBox(data) {
 	Box.call(this);
 	this.id = RequestBox.id;
+	this.adminStreamOnly = true;
 
 	if (data.isConsole){
 		//this.something = data.line.split(';');
@@ -27,10 +28,9 @@ function RequestBox(data) {
 	}
 }
 
-RequestBox.adminStreamOnly = true;
 RequestBox.id = "RequestBox";
 
-RequestBox.prototype.addResponseListenersAdmin = function(socket, reqMan) {
+RequestBox.prototype.addAdminResponseListeners = function(socket, reqMan) {
 	var self = this;
 	var adminStream = reqMan.adminStream;
 

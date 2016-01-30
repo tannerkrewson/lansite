@@ -183,9 +183,8 @@ Stream.prototype.sendBox = function(uniqueOfBoxToSend, reqMan) {
     if (index !== -1){
         var boxToSend = this.boxes[index];
         //add the socket listeners to each user's socket
-        //TODO: Unhardcode:
-        if (boxToSend.id === "RequestBox"){
-            Dispatcher.attachListenersToAllUsersAdmin(boxToSend, reqMan);
+        if (boxToSend.adminStreamOnly){
+            Dispatcher.attachAdminListenersToAllUsers(boxToSend, reqMan);
         } else {
             Dispatcher.attachListenersToAllUsers(boxToSend, this);
         }
@@ -623,7 +622,7 @@ io.on('connection', function(socket) {
 
             //add the socket listeners to the user for all of the current boxes
             for (var i = adminStream.boxes.length - 1; i >= 0; i--) {
-                Dispatcher.attachListenersToAllUsersAdmin(adminStream.boxes[i], mainStream.requestManager);
+                Dispatcher.attachAdminListenersToAllUsers(adminStream.boxes[i], mainStream.requestManager);
             };
 
         } else {

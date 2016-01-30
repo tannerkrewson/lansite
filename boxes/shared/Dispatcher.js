@@ -51,11 +51,10 @@ Dispatcher.attachListenersToAllUsers = function(box, stream) {
 	});
 }
 
-Dispatcher.attachListenersToAllUsersAdmin = function(box, reqMan) {
+Dispatcher.attachAdminListenersToAllUsers = function(box, reqMan) {
 	reqMan.adminStream.users.list.forEach(function(user) {
-		//TODO: Unhardcode/
-		if (user.socket !== null && box.id === 'RequestBox') {
-			box.addResponseListenersAdmin(user.socket, reqMan);
+		if (user.socket !== null && box.adminStreamOnly) {
+			box.addAdminResponseListeners(user.socket, reqMan);
 		}
 	});
 }
