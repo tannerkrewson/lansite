@@ -13,12 +13,18 @@ VoteBox.prototype = Object.create(Box.prototype);
 function VoteBox(data) {
 	Box.call(this);
 	this.id = VoteBox.id;
-	
+
+	this.voteTitle 
 	this.choices = [];
 
 	if (data.isConsole){
-		this.addChoices(data.line.split(';'));
+		var consoleArr = data.line.split(';');
+		this.voteTitle = consoleArr[0];
+		//remove the first element from the array
+		consoleArr.shift();
+		this.addChoices(consoleArr);
 	} else {
+		this.voteTitle = data.voteTitle;
 		this.addChoices(data.choices);
 	}
 }

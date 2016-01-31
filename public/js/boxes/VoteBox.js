@@ -15,6 +15,7 @@ function VoteBox(data) {
 //@Override
 VoteBox.prototype.updateData = function(data) {
     this.choices = data.choices;
+    this.voteTitle = data.voteTitle;
 }
 
 //@Override
@@ -25,11 +26,15 @@ VoteBox.prototype.show = function() {
 
     var thisVoteBox = $('#' + this.unique);
 
+    //add the title to the html
+    thisVoteBox.find('.votetitle').html(this.voteTitle);
+
     //add the choices to the html
     this.redrawChoices();
 
     //add handlers to the add game box
     //function to be ran when user submits a choice request
+    var addChoiceInput = thisVoteBox.find('.voteadd');
     var reqChoice = function() {
         //check to make sure they typed something
         var choiceRequest = addChoiceInput.val().trim();
@@ -40,7 +45,6 @@ VoteBox.prototype.show = function() {
     };
 
     //when the enter key is pressed inside the input box
-    var addChoiceInput = thisVoteBox.find('.voteadd');
     addChoiceInput.bind('keypress', function(e) {
         if(e.keyCode==13){
             reqChoice();
@@ -72,7 +76,8 @@ VoteBox.addButtons = function(sidebar) {
     var self = this;
     button.on('click', function(event) {
         SendToServer.request('vote', {
-            choices: ["Game1","Game2","Game3"]
+            voteTitle: 'What would you like to play?',
+            choices: ["Battlefield 2","Team Fortress 2","Quake Live","Artemis"]
         });
     });
 }
