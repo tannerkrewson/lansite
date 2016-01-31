@@ -50,18 +50,21 @@ VoteBox.prototype.addResponseListeners = function(socket, stream) {
 	var self = this;
 	socket.on(self.unique + '-vote', function(msg) {
 		//check if the user is logged in
-		if (stream.users.checkIfUserExists(msg.unique)) {
+		var user = stream.users.checkIfUserExists(msg.unique);
+		if (user) {
+			//recreate user object to prevent maximum call stack size error
+			//TODO: Find a more elegant solution
+			var jsonUser = {
+				unique: user.unique,
+				id: user.id,
+				displayName: user.displayName,
+				realName: user.realName,
+				isOp: user.isOp
+			}
 			var indexOfChoice = self.getIndexOfChoiceByUnique(msg.data.unique);
 			//if the choice exists
 			if (indexOfChoice !== -1) {
-				//check for type of vote
-				if (msg.data.typeOfVote === 'up') {
-					//upvote
-					self.choices[indexOfChoice].voteUp(msg.unique);
-				} else if (msg.data.typeOfVote === 'down') {
-					//downvote
-					self.choices[indexOfChoice].voteDown(msg.unique);
-				}
+				self.choices[indexOfChoice].toggleVote(jsonUser);
 				//sort the array for the client
 				self.sortByVotes();
 			}
@@ -127,48 +130,29 @@ function VoteBoxChoice(choiceName) {
 	this.unique = crypto.randomBytes(20).toString('hex');
 	this.name = choiceName;
 	this.votes = 0;
-	this.votedUpBy = [];
-	this.votedDownBy = [];
+	this.votedBy = [];
 }
 
-//opposite of voteDown function
-VoteBoxChoice.prototype.voteUp = function(userUnique) {
+VoteBoxChoice.prototype.toggleVote = function(user) {
 	//if the user has not upvoted already
-	if (this.votedUpBy.indexOf(userUnique) === -1) {
-		//if the user has downvoted
-		var downVoteIndex = this.votedDownBy.indexOf(userUnique);
-		if (downVoteIndex !== -1) {
-			//upvote twice to remove their downvote
-			this.votes += 2;
-			//remove the user from the downvote list
-			this.votedDownBy.splice(downVoteIndex, 1);
-		} else {
-			//upvote
-			this.votes++;
-		}
+    var hasAlreadyVoted = false;
+    for (var i = this.votedBy.length - 1; i >= 0; i--) {
+        if (this.votedBy[i].unique === user.unique) {
+            hasAlreadyVoted = true;
+            break;
+        }
+    };
+	if (!hasAlreadyVoted) {
+		this.votes++;
 		//add the user to the list of users who have upvoted
-		this.votedUpBy.push(userUnique);
+		this.votedBy.push(user);
+	} else {
+		this.votes--;
+		//remove the user from the voted list
+		var upVoteIndex = this.votedBy.indexOf(user);
+		this.votedBy.splice(upVoteIndex, 1);
 	}
 }
 
-//opposite of voteUp function
-VoteBoxChoice.prototype.voteDown = function(userUnique) {
-	//if the user has not downvoted already
-	if (this.votedDownBy.indexOf(userUnique) === -1) {
-		//if the user has upvoted
-		var upVoteIndex = this.votedUpBy.indexOf(userUnique);
-		if (upVoteIndex !== -1) {
-			//downvote twice to remove their upvote
-			this.votes -= 2;
-			//remove the user from the upvote list
-			this.votedUpBy.splice(upVoteIndex, 1);
-		} else {
-			//downvote
-			this.votes--;
-		}
-		//add the user to the list of users who have downvoted
-		this.votedDownBy.push(userUnique);
-	}
-}
 
 module.exports = VoteBox;

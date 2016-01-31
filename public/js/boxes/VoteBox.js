@@ -29,19 +29,27 @@ VoteBox.prototype.show = function() {
     this.redrawChoices();
 
     //add handlers to the add game box
-    // http://stackoverflow.com/questions/6524288/jquery-event-for-user-pressing-enter-in-a-textbox
+    //function to be ran when user submits a choice request
+    var reqChoice = function() {
+        //check to make sure they typed something
+        var choiceRequest = addChoiceInput.val().trim();
+        if (choiceRequest !== ''){
+            self.requestAddChoice(choiceRequest);
+            addChoiceInput.val('');
+        }
+    };
+
+    //when the enter key is pressed inside the input box
     var addChoiceInput = thisVoteBox.find('.voteadd');
-    //when the enter key is press inside the input box
     addChoiceInput.bind('keypress', function(e) {
         if(e.keyCode==13){
-            //check to make sure they typed something
-            var choiceRequest = addChoiceInput.val().trim();
-            if (choiceRequest !== ''){
-                self.requestAddChoice(choiceRequest);
-                addChoiceInput.val('');
-            }
+            reqChoice();
         }
     });
+
+    //do the same for when the little button is clicked
+    var button = thisVoteBox.find('.voteaddbutton');
+    button.on('click', reqChoice);
 }
 
 VoteBox.prototype.update = function() {
@@ -69,7 +77,7 @@ VoteBox.addButtons = function(sidebar) {
     });
 }
 
-VoteBox.prototype.sendVote = function(choiceUnique, typeOfVote) {
+VoteBox.prototype.sendVote = function(choiceUnique) {
     //this check is to save the server the trouble of having to respond
     //    to phony votes, not strictly neccessary as the server will
     //    still check if the user has already voted
@@ -86,25 +94,9 @@ VoteBox.prototype.sendVote = function(choiceUnique, typeOfVote) {
         return;
     }
 
-    var userUnique = Cookies.get('unique');
-    //set to true just in case something crazy happens
-    var userAlreadyVoted = true;
-    if (typeOfVote === 'up') {
-        userAlreadyVoted = (choice.votedUpBy.indexOf(userUnique) !== -1);
-    } else if (typeOfVote === 'down') {
-        userAlreadyVoted = (choice.votedDownBy.indexOf(userUnique) !== -1);
-    } else {
-        //something crazy happened, lets get outta here
-        return;
-    }
-
-    //if the user has not already upvoted
-    if (!userAlreadyVoted) {
-        SendToServer.eventFromIndBox(this.unique, 'vote', {
-            unique: choiceUnique,
-            typeOfVote: typeOfVote
-        });
-    }
+    SendToServer.eventFromIndBox(this.unique, 'vote', {
+        unique: choiceUnique
+    });
 }
 
 VoteBox.prototype.redrawChoices = function(){
@@ -113,6 +105,8 @@ VoteBox.prototype.redrawChoices = function(){
 
     var self = this;
     var thisVoteBox = $('#' + this.unique);
+    var userUnique = Cookies.get('unique');
+
     //loop through each choice and add them
     for (var i = 0; i < this.choices.length; i++) {
         var choiceTemplate = Box.findTemplate('VoteBox-choice');
@@ -122,19 +116,35 @@ VoteBox.prototype.redrawChoices = function(){
         //add an id to our choice
         thisChoice.attr('id', choiceUnique);
 
-        var button = $('#' + choiceUnique).find('.choicevotebutton');
-        // http://stackoverflow.com/questions/1451009/javascript-infamous-loop-issue
-        (function(cu) {
-            button.on('click', function(event) {
-                self.sendVote(cu, 'up');
-            });
-        })(choiceUnique);
+        //add an id to the button for the user dropdown
+        var voteCounter = $('#' + choiceUnique).find('.choicevotes');
+        var voteCounterId = choiceUnique + "-choicevotes";
+        voteCounter.attr("id", voteCounterId);
 
-        var downVoteButton = $('#' + choiceUnique).find('.choicedownvotebutton');
+        var votersDropdown = $('#' + choiceUnique).find('.choicevoterslist');
+        //link dropdown to the button
+        votersDropdown.attr("id", choiceUnique + "-choicevoterslist");
+        votersDropdown.attr("aria-labelledby", voteCounterId);
+
+        var check = $('#' + choiceUnique).find('.choicevotebutton');
+
+        //check the box if the user has already voted for it
+        var hasAlreadyVoted = false;
+        for (var j = this.choices[i].votedBy.length - 1; j >= 0; j--) {
+            if (this.choices[i].votedBy[j].unique === userUnique) {
+                hasAlreadyVoted = true;
+                break;
+            }
+        };
+        if (hasAlreadyVoted) {
+            check.prop("checked", true);
+        }
+
+        //send a vote if the user checks or unchecks the checkbox
         // http://stackoverflow.com/questions/1451009/javascript-infamous-loop-issue
         (function(cu) {
-            downVoteButton.on('click', function(event) {
-                self.sendVote(cu, 'down');
+            check.change(function() {
+                self.sendVote(cu);
             });
         })(choiceUnique);
     }
@@ -155,6 +165,9 @@ VoteBox.prototype.updateChoiceName = function(choice) {
 }
 
 VoteBox.prototype.updateChoiceVotes = function(choice) {
+    var thisChoice = $("#" + choice.unique + "-choicevotes");
+
+    //append the number of votes
     var result = '';
     //this will format the vote number, e.g. +1, -4, +0
     if (choice.votes >= 0) {
@@ -162,7 +175,33 @@ VoteBox.prototype.updateChoiceVotes = function(choice) {
     } else {
         result = choice.votes;
     }
-    $('#' + choice.unique).find('.choicevotes').html(result);
+    thisChoice.html(result);
+
+    //update the voters dropdown
+    var thisDropdown = $("#" + choice.unique + "-choicevoterslist");
+    //remove all users currently on the list, if any
+    thisDropdown.empty();
+    //if no users have picked this choice
+    if (choice.votedBy.length === 0) {
+        thisDropdown.append(
+            $('<li>').append(
+                $('<a>').attr('href', '#').append(
+                    $('<span>').attr('class', 'tab').append('No users')
+                )));
+    } else {
+        //for each user in the votedBy array for this choice
+        choice.votedBy.forEach(function(user) {
+            //prepare the string
+            var username = user.displayName;
+
+            //append the string to the list
+            thisDropdown.append(
+                $('<li>').append(
+                    $('<a>').attr('href', 'http://steamcommunity.com/profiles/' + user.id).append(
+                        $('<span>').attr('class', 'tab').append(username)
+                    )));
+        });
+    }
 }
 
 VoteBox.prototype.getIndexOfChoiceByUnique = function(unique) {

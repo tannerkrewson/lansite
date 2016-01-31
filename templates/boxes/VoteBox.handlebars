@@ -11,10 +11,10 @@
 		<div class="choices">
 		</div>
 		<div class="input-group">
-			<span class="input-group-btn">
-				<button class="btn btn-default" type="button"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></button>
-			</span>
 			<input type="text" class="form-control voteadd" placeholder="Add a game...">
+			<span class="input-group-btn">
+				<button class="btn btn-default voteaddbutton" type="button"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></button>
+			</span>
 		</div><!-- /input-group -->
 	</div>
 </template>
@@ -22,12 +22,15 @@
 <template id="VoteBox-choice">
 	<div class="input-group">
 		<span class="input-group-btn">
-			<button class="btn btn-default choicevotes" type="button">+0</button>
+			<button class="btn btn-default dropdown-toggle choicevotes" type="button" data-toggle="dropdown" aria-haspopup="true">+0</button>
+			<ul class="dropdown-menu choicevoterslist" aria-labelledby="">
+				<li><a href="#">Action</a></li>
+				<li><a href="#">Another action</a></li>
+			</ul>
 		</span>
 		<input type="text" class="form-control choicename" readonly="readonly" value="error">
-		<span class="input-group-btn">
-			<button class="btn btn-default choicedownvotebutton" type="button"><span class="glyphicon glyphicon-download" aria-hidden="true"></span></button>
-			<button class="btn btn-default choicevotebutton" type="button"><span class="glyphicon glyphicon-upload" aria-hidden="true"></span></button>
+		<span class="input-group-addon">
+			<input type="checkbox" class="choicevotebutton" aria-label="...">
 		</span>
 	</div><!-- /input-group -->
 </template>
