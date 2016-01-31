@@ -472,6 +472,13 @@ function RequestManager() {
 }
 
 RequestManager.prototype.addRequest = function(userThatMadeRequest, requestString, acceptFunction, denyFunction){
+    //if the user is op, accept the request, no questions asked
+    if (userThatMadeRequest.isOp) {
+        //I bypass adding the request and using the handler here
+        acceptFunction();
+        return;
+    }
+
     //since users can only have one request open at a time
     //check to see if they have a request open already
     var prevReq = this.userHasOpenRequest(userThatMadeRequest.unique);
