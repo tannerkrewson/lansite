@@ -13,11 +13,23 @@
 				<h4 class="modal-title">Request Vote</h4>
 			</div>
 			<div class="modal-body">
-				Would you like to request a vote?
+				<div style="width:100%; display:table">
+					<div class="input-group" style="display:table-cell; width:100%">
+						Enter your question:
+				    	<input type="text" class="form-control reqvotetitle" placeholder="e.g. What game should we play next?"/>
+					</div><!-- /input-group -->
+				</div>
+				<br>
+				<div style="width:100%; display:table">
+					<div class="input-group" style="display:table-cell; width:100%">
+						Enter your choices, seperated by semicolons:
+				    	<input type="text" class="form-control reqvotechoices" placeholder="e.g. Battlefield 2;Minecraft;Quake Live"/>
+					</div><!-- /input-group -->
+				</div>
 			</div>
 			<div class="modal-footer">
-				<button type="button" class="btn btn-default" data-dismiss="modal">No</button>
-				<button id="VoteBox-Popup-submit" type="button" class="btn btn-primary" data-dismiss="modal">Yes</button>
+				<button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+				<button id="VoteBox-Popup-submit" type="button" class="btn btn-primary" data-dismiss="modal">Request</button>
 			</div>
 		</div>
 	</div>

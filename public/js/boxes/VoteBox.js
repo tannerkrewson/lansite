@@ -75,9 +75,19 @@ VoteBox.addButtons = function(sidebar) {
     var button = $('#VoteBox-Popup-submit');
     var self = this;
     button.on('click', function(event) {
+        //get the title from the input box
+        var title = popup.find('.reqvotetitle').val();
+
+        //do the same for the choices
+        var choices = popup.find('.reqvotechoices').val();
+
+        //clear the inputs
+        popup.find('.reqvotetitle').val('');
+        popup.find('.reqvotetitle').val('');
+
         SendToServer.request('vote', {
-            voteTitle: 'What would you like to play?',
-            choices: ["Battlefield 2","Team Fortress 2","Quake Live","Artemis"]
+            voteTitle: title,
+            choices: choices.split(';')
         });
     });
 }
