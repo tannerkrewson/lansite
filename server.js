@@ -92,7 +92,9 @@ app.get('/', exposeTemplates, function(req, res) {
 });
 
 app.get('/admin', exposeTemplates, function(req, res) {
-    res.render('home');
+    res.render('home', {
+        layout: 'admin'
+    });
 });
 
 
