@@ -620,7 +620,7 @@ io.on('connection', function(socket) {
 
             //add the socket listeners to the user for all of the current boxes
             for (var i = mainStream.boxes.length - 1; i >= 0; i--) {
-                Dispatcher.attachListenersToAllUsers(mainStream.boxes[i], mainStream);
+                Dispatcher.attachListenersToUser(user, mainStream.boxes[i], mainStream);
             };
 
             socket.on('disconnect', function() {
@@ -650,7 +650,7 @@ io.on('connection', function(socket) {
 
             //add the socket listeners to the user for all of the current boxes
             for (var i = adminStream.boxes.length - 1; i >= 0; i--) {
-                Dispatcher.attachAdminListenersToAllUsers(adminStream.boxes[i], mainStream.requestManager);
+                Dispatcher.attachAdminListenersToUser(user, adminStream.boxes[i], mainStream.requestManager);
             };
 
         } else {

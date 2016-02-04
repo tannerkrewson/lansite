@@ -43,19 +43,27 @@ Dispatcher.sendUpdatedBoxToAll = function(box, users) {
 	console.log('Sent updated box to all');
 }
 
+Dispatcher.attachListenersToUser = function(user, box, stream) {
+	if (user.socket !== null) {
+		box.addResponseListeners(user.socket, stream);
+	}
+}
+
+Dispatcher.attachAdminListenersToUser = function(user, box, reqMan) {
+	if (user.socket !== null && box.adminStreamOnly) {
+		box.addAdminResponseListeners(user.socket, reqMan);
+	}
+}
+
 Dispatcher.attachListenersToAllUsers = function(box, stream) {
 	stream.users.list.forEach(function(user) {
-		if (user.socket !== null) {
-			box.addResponseListeners(user.socket, stream);
-		}
+		Dispatcher.attachListenersToUser(user, box, stream);
 	});
 }
 
 Dispatcher.attachAdminListenersToAllUsers = function(box, reqMan) {
 	reqMan.adminStream.users.list.forEach(function(user) {
-		if (user.socket !== null && box.adminStreamOnly) {
-			box.addAdminResponseListeners(user.socket, reqMan);
-		}
+		Dispatcher.attachListenersToUser(user, box, reqMan);
 	});
 }
 
