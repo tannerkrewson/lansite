@@ -1,0 +1,43 @@
+<!--
+
+  Lansite MatchBox Popup
+  By Tanner Krewson
+
+-->
+
+<div id="MatchBox-Popup" class="modal fade" role="dialog">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal">&times;</button>
+				<h4 class="modal-title">Find people to play with</h4>
+			</div>
+			<div class="modal-body">
+				<div style="width:100%; display:table">
+					<div class="input-group" style="display:table-cell; width:100%">
+						Enter the name of the game:
+				    	<input type="text" class="form-control matchpopupgame"/>
+					</div><!-- /input-group -->
+				</div>
+				<br>
+				<div style="width:100%; display:table">
+					<div class="input-group" style="display:table-cell; width:100%">
+						Minimum number of players:
+				    	<input type="number" class="form-control matchpopupmin"/>
+					</div><!-- /input-group -->
+				</div>
+				<br>
+				<div style="width:100%; display:table">
+					<div class="input-group" style="display:table-cell; width:100%">
+						Maximum number of players:
+				    	<input type="number" class="form-control matchpopupmax"/>
+					</div><!-- /input-group -->
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+				<button id="MatchBox-Popup-submit" type="button" class="btn btn-primary" data-dismiss="modal">Request</button>
+			</div>
+		</div>
+	</div>
+</div>

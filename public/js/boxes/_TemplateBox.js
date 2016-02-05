@@ -16,7 +16,7 @@ function TemplateBox(data) {
 }
 
 //@Override
-VoteBox.prototype.updateData = function(data) {
+TemplateBox.prototype.updateData = function(data) {
     //Add your constructor here
     this.foo = data.bar;
 }
@@ -28,6 +28,9 @@ TemplateBox.prototype.show = function() {
     //Runs the parent show function
     Box.prototype.show.call(this);
 
+    //Access to this box on the page
+    var thisTemplateBox = $('#' + this.unique);
+
     //Place any custom code here
 
 }
@@ -38,6 +41,9 @@ TemplateBox.prototype.update = function() {
     //Runs the parent update function
     Box.prototype.update.call(this);
 
+    //Access to this box on the page
+    var thisTemplateBox = $('#' + this.unique);
+    
     //Place any custom code here
     
 }
