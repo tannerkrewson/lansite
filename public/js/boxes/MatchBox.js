@@ -28,15 +28,6 @@ MatchBox.prototype.show = function() {
     //Access to this box on the page
     var thisMatchBox = $('#' + this.unique);
 
-    //If there are no matches
-    if (this.matches.length === 0){
-        //show the empty list text
-        thisMatchBox.find('.matchboxempty').show();
-    } else {
-        //hide the text
-        thisMatchBox.find('.matchboxempty').hide();
-    }
-
     //add an event to the submit button of the popup
     var popup = $('#MatchBox-Popup');
     var button = $('#MatchBox-Popup-submit');
@@ -80,6 +71,15 @@ MatchBox.prototype.drawMatches = function() {
     var thisMatchBox = $('#' + this.unique);
     var userUnique = Cookies.get('unique');
 
+    //If there are no matches
+    if (this.matches.length === 0){
+        //show the empty list text
+        thisMatchBox.find('.matchboxempty').show();
+    } else {
+        //hide the text
+        thisMatchBox.find('.matchboxempty').hide();
+    }
+
     for (var i = 0; i < this.matches.length; i++) {
         var matchTemplate = Box.findTemplate('MatchBox-match');
         var thisMatch = thisMatchBox.find('.matches').append(matchTemplate).children(':last');
@@ -103,6 +103,13 @@ MatchBox.prototype.drawMatches = function() {
 
         var acceptButton = thisMatch.find('.matchaccept');
         var cancelButton = thisMatch.find('.matchcancel');
+        var fullButton = thisMatch.find('.matchfull');
+
+        //precautionary
+        acceptButton.hide();
+        cancelButton.hide();
+        fullButton.hide();
+
         //determine which button to show
         // if this user is in the match
         if (this.checkIfUserInMatch(userUnique, this.matches[i])) {
@@ -128,8 +135,15 @@ MatchBox.prototype.drawMatches = function() {
                     });
                 });
             })(matchUnique);
-        }
 
+            //if the user is not in the match and if the match is full
+            //  and if there is a player limit, show the full button
+            if (this.matches[i].users.length >= this.matches[i].max && this.matches[i].max !== 0) {
+                acceptButton.hide();
+                cancelButton.hide();
+                fullButton.show();
+            }
+        }
     };
 }
 
@@ -140,7 +154,13 @@ MatchBox.prototype.updateMatchString = function(match) {
 
 MatchBox.prototype.updateMatchCounter = function(match) {
     //do the fraction
-    var result = match.users.length + '/' + match.max;
+    var result;
+    //if max is zero, then there is no limit to the players that can join
+    if (match.max == 0) {
+        result = match.users.length;
+    } else {
+        result = match.users.length + '/' + match.max;
+    }
     $('#' + match.unique).find('.matchcounter').html(result);
 
     //update the users dropdown

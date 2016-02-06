@@ -1,5 +1,5 @@
 //
-//  Lansite Client Box Template
+//  Lansite Client RequestBox
 //  By Tanner Krewson
 //
 
