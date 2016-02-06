@@ -11,25 +11,24 @@
 		<h4 class="matchboxempty" style="text-align:center">No one is looking for players!</h4>
 		<div class="matches">
 
-		</div>
-		<button class="btn btn-primary pull-right matchadd" type="button" data-toggle="modal" data-target="#MatchBox-Popup">+Host a Game</button>
+		</div><br/>
+		<button class="btn btn-primary pull-right matchadd" type="button" data-toggle="modal" data-target="#MatchBox-Popup">+Find players</button><br/>
 	</div>
 </template>
 
 <template id="MatchBox-match">
-	<div class="input-group match" style="display: inline;">
-		<div class="matchstring" style="display: inline;">
-			error
-		</div>
-		<div class="dropdown pull-right" style="display: inline;">
-			<button class="btn btn-default dropdown-toggle matchcounter" type="button" id="matchdropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">X<span class="caret"></span>
+	<div class="input-group match">
+		<span class="input-group-addon matchstring" style="width: 100%; text-align: left;">
+				error
+	    </span>
+	    <span class="input-group-addon">
+	    	<button class="btn btn-default dropdown-toggle matchcounter" type="button" id="matchdropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">X
 			</button>
 			<ul class="dropdown-menu matchusers" aria-labelledby="matchdropdown">
 			</ul>
-		</div>
-	    <button class="btn btn-primary pull-right matchaccept" type="button" style="display: inline;">I'll play!</button>
-	    <button class="btn btn-danger pull-right matchcancel" type="button" style="display: inline;" hidden>Dropout</button>
-	    <hr>
+	    	<button class="btn btn-primary matchaccept" type="button">I'll play!</button>
+	    	<button class="btn btn-danger matchcancel" type="button"hidden>Dropout</button>
+	    </span>
     </div>
 </template>
 
