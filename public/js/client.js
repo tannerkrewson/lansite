@@ -9,6 +9,8 @@
 
 var socket = io();
 
+var isThisUserOP = false;
+
 //will contain all the loaded client boxes
 var BoxNames = [];
 
@@ -140,10 +142,34 @@ Box.prototype.show = function() {
     console.log('Displaying box with id ' + this.id + ' and unique ' + this.unique);
 
     //Append the template to the stream div,
-    //  then change the id of the last div in stream (which is the one we just added)
     var clone = Box.findTemplate(this.id)
-    $('#stream').append(clone).children(':last').attr('id', this.unique);
+    var thisBox = $('#stream').append(clone).children(':last');
 
+    //Change the id of the last div in stream (which is the one we just added)
+    thisBox.attr('id', this.unique);
+
+    //add the x button
+    thisBox.prepend(
+        $('<button>').attr({
+            type: "button",
+            class: "close closebox",
+            id: this.unique + '-closebox',
+        }).append('&times;')
+    );
+    var closeButton = thisBox.find('.closebox');
+    closeButton.hide();
+
+    //if this user is op
+    if (isThisUserOP){
+        //tell the server to delete the box id clicked
+        var self = this;
+        closeButton.click(function() {
+            SendToServer.requestFromIndBox(self.unique, 'removebox', {});
+        });
+
+        //show the close button
+        closeButton.show();
+    }
 };
 
 Box.emitEvent = function(boxUnique, eventName, data) {
@@ -190,6 +216,10 @@ SendToServer.requestFromIndBox = function(boxUnique, requestName, data){
     SendToServer.generic(boxUnique + '-request-' + requestName, data);
 }
 
+SendToServer.areWeOP = function(){
+    SendToServer.generic('areWeOP', {});
+}
+
 
 
 //
@@ -219,6 +249,9 @@ if (window.location.href.endsWith('admin')) {
 
 //replaces the current stream with the received one
 socket.on('newStream', function(msg) {
+    //see if we are op
+    SendToServer.areWeOP();
+
     //deletes all boxes currently in the array
     mainStream.clearArray();
 
@@ -245,4 +278,8 @@ socket.on('updateBox', function(msg) {
 socket.on('updateUsers', function(msg) {
     mainSidebar.replaceUsers(msg);
     mainSidebar.updateUsers();
+});
+
+socket.on('areWeOP', function(msg) {
+    isThisUserOP = msg && true;
 });

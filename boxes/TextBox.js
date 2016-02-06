@@ -24,7 +24,10 @@ TextBox.id = "TextBox";
 TextBox.prototype.changeText = function(text) {
     this.text = text;
 }
-TextBox.prototype.addResponseListeners = function(socket, dispatcher) {
+TextBox.prototype.addResponseListeners = function(socket, stream) {
+	//Runs the parent addResponseListeners function
+	Box.prototype.addResponseListeners.call(this, socket, stream);
+
 	//not much to do here... yet
 }
 

@@ -32,6 +32,9 @@ function TemplateBox(data) {
 TemplateBox.id = "TemplateBox";
 
 TemplateBox.prototype.addResponseListeners = function(socket, stream) {
+	//Runs the parent addResponseListeners function
+	Box.prototype.addResponseListeners.call(this, socket, stream);
+
 	var self = this;
 	socket.on(self.unique + '-test', function(msg) {
 

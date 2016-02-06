@@ -53,6 +53,9 @@ VoteBox.addRequestListeners = function(socket, stream) {
 }
 
 VoteBox.prototype.addResponseListeners = function(socket, stream) {
+	//Runs the parent addResponseListeners function
+	Box.prototype.addResponseListeners.call(this, socket, stream);
+	
 	var self = this;
 	socket.on(self.unique + '-vote', function(msg) {
 		//check if the user is logged in

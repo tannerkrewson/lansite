@@ -16,7 +16,7 @@ function InitialBox(data) {
 
 InitialBox.id = "InitialBox";
 
-InitialBox.prototype.addResponseListeners = function(socket, dispatcher) {
+InitialBox.prototype.addResponseListeners = function(socket, stream) {
 	//not much to do here... yet
 }
 

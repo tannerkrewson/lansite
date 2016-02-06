@@ -368,6 +368,15 @@ Users.prototype.checkIfUserExists = function(unique) {
     return false;
 }
 
+Users.prototype.checkIfUserIsOP = function(unique) {
+    for (element of this.list) {
+        if (element.unique === unique) {
+            return element.isOp;
+        }
+    }
+    return false;
+}
+
 Users.prototype.removeUser = function(userToRemove) {
     var indexToRemove = this.list.indexOf(userToRemove);
     if (indexToRemove > -1) {
@@ -394,10 +403,10 @@ Users.prototype.getOnlineUsers = function() {
     return result;
 }
 
-Users.prototype.getOppedUsers = function() {
+Users.prototype.getOnlineOppedUsers = function() {
     var result = [];
     this.list.forEach(function(user) {
-        if (user.isOnline()) {
+        if (user.isOnline() && user.isOP) {
             result.push(user);
         }
     });
@@ -658,6 +667,14 @@ io.on('connection', function(socket) {
         }
 
 
+    });
+
+    socket.on('areWeOP', function(msg) {
+        if (mainStream.users.checkIfUserIsOP(msg.unique)){
+            socket.emit('areWeOP', true);
+        } else {
+            socket.emit('areWeOP', false);
+        }
     });
 
     socket.on('disconnect', function() {
