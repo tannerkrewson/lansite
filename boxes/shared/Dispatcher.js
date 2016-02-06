@@ -63,7 +63,7 @@ Dispatcher.attachListenersToAllUsers = function(box, stream) {
 
 Dispatcher.attachAdminListenersToAllUsers = function(box, reqMan) {
 	reqMan.adminStream.users.list.forEach(function(user) {
-		Dispatcher.attachListenersToUser(user, box, reqMan);
+		Dispatcher.attachAdminListenersToUser(user, box, reqMan);
 	});
 }
 

@@ -18,7 +18,6 @@ function MatchBox(data) {
 	this.matches = [];
 
 	if (data.isConsole){
-		this.something = data.line.split(';');
 		//data.line will be whatever is after the command in the console.
 		//Example of command entered into console:
 		//
