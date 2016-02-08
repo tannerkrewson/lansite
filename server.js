@@ -654,12 +654,12 @@ io.on('connection', function(socket) {
             var adminStream = mainStream.requestManager.adminStream;
             var userUnique = msg.unique;
             adminStream.users.addUserOrUpdateUnique(userUnique);
-            adminStream.users.admitUserIfExists(userUnique, socket);
+            var adminUser = adminStream.users.admitUserIfExists(userUnique, socket);
             adminStream.prepNewUser(userUnique, mainStream);
 
             //add the socket listeners to the user for all of the current boxes
             for (var i = adminStream.boxes.length - 1; i >= 0; i--) {
-                Dispatcher.attachAdminListenersToUser(user, adminStream.boxes[i], mainStream.requestManager);
+                Dispatcher.attachAdminListenersToUser(adminUser, adminStream.boxes[i], mainStream.requestManager);
             };
 
         } else {
