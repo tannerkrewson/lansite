@@ -228,7 +228,7 @@ Stream.prototype.getBoxIndexByUnique = function(boxUnique) {
     return -1;
 }
 
-Stream.prototype.prepNewUser = function(userUnique, mainStreamIfAppl) {
+Stream.prototype.prepNewUser = function(userUnique) {
     var user = this.users.checkIfUserExists(userUnique)
 
     //if the user exists in this stream
@@ -254,17 +254,27 @@ Stream.prototype.initializeSteamLogin = function() {
     var self = this;
     var LoginSuccessHandler = function(req, res, stream) {
         //this is ran when the user successfully logs into steam
+        var user = req.user;
+        var unique;
 
-        //generate the user's unique identifier that will be use
-        //    to identify them once they are redirected to the
-        //    main stream.
-        var tempUnique = crypto.randomBytes(20).toString('hex');
+        //if the user already exists
+        var userAlreadyExists = stream.users.checkIfUserExistsByID(req.user.id);
+
+        if (userAlreadyExists){
+            //reuse the unique
+            unique = userAlreadyExists.unique;
+        } else {
+            //generate the user's unique identifier that will be use
+            //    to identify them once they are redirected to the
+            //    main stream.
+            unique = crypto.randomBytes(20).toString('hex');
+        }
 
         //add the user to the stream and await their return
-        stream.users.addUserOrUpdateUnique(tempUnique, req.user.id, req.user.displayName, req.user._json.realname);
+        stream.users.addUserOrUpdateUnique(unique, user.id, user.displayName, user._json.realname);
 
         //set a cookie that will act as the user's login token
-        res.cookie('unique', tempUnique, {
+        res.cookie('unique', unique, {
             maxAge: 604800000 // Expires in one week
         });
 
@@ -357,6 +367,15 @@ Users.prototype.admitUserIfExists = function(unique, socket) {
     //user not found
     //TODO: Switch over to a system thats better than just using null
     return null;
+}
+
+Users.prototype.checkIfUserExistsByID = function(id) {
+    for (element of this.list) {
+        if (element.id === id) {
+            return element;
+        }
+    }
+    return false;
 }
 
 Users.prototype.checkIfUserExists = function(unique) {
