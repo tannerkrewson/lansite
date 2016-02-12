@@ -11,6 +11,7 @@ Lansite is web app made for smaller LAN parties. It is designed to be a simple, 
 ## Included Boxes
 * VoteBox: Give your attendees a choice in what game to play next, what to eat, etc.
 * TextBox: Give a quick notice to everyone.
+* MatchBox: Allow your attendees to list games they want to play and find players.
 
 ## Install
 1. Clone this repo however you prefer.
@@ -22,8 +23,9 @@ Lansite is web app made for smaller LAN parties. It is designed to be a simple, 
 
 ## Server Console Commands
 ###NOTE: Box names are case-sensitive.
-* add TextBox [text to display here]
+* add TextBox [text/HTML to display here]
 * add VoteBox [each choice separated by a semicolon here]
+* add MatchBox
 * stop
 
 ## Custom Box Creation Instructions

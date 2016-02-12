@@ -38,7 +38,7 @@ VoteBox.addRequestListeners = function(socket, stream) {
 		//check if the user is logged in
 		var user = stream.users.checkIfUserExists(msg.unique);
 		if (user) {
-			stream.requestManager.addRequest(user, 'wants to start a vote', function(){
+			stream.requestManager.addRequest(user, 'wants to start a vote. Title: "' + msg.data.voteTitle + '" Choices: ' + msg.data.choices, function(){
 				var boxUnique = stream.addBoxById('VoteBox', msg.data);
 				stream.sendBox(boxUnique);
 				console.log('Request accepted');

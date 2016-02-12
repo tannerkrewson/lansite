@@ -3,6 +3,8 @@
 //  By Tanner Krewson
 //
 
+var Config = JSON.parse(require('fs').readFileSync('./config.json', 'utf8'));
+
 function Dispatcher() {}
 
 Dispatcher.sendStream = function(boxes, userToReceiveStream) {
@@ -19,7 +21,8 @@ Dispatcher.sendStreamToAll = function(boxes, users) {
 			Dispatcher.sendStream(boxes, tempUser);
 		}
 	});
-	console.log('Sent stream to all')
+	if (Config.developerMode)
+		console.log('Sent stream to all')
 }
 
 Dispatcher.sendNewBoxToAll = function(box, users) {
@@ -29,7 +32,8 @@ Dispatcher.sendNewBoxToAll = function(box, users) {
 			element.socket.emit('newBox', box);
 		}
 	});
-	console.log('Sent new box to all');
+	if (Config.developerMode)
+		console.log('Sent new box to all');
 }
 
 Dispatcher.sendUpdatedBoxToAll = function(box, users) {
@@ -40,7 +44,8 @@ Dispatcher.sendUpdatedBoxToAll = function(box, users) {
 			element.socket.emit('updateBox', box);
 		}
 	});
-	console.log('Sent updated box to all');
+	if (Config.developerMode)
+		console.log('Sent updated box to all');
 }
 
 Dispatcher.attachListenersToUser = function(user, box, stream) {
@@ -89,7 +94,8 @@ Dispatcher.sendUserListToAll = function(users) {
 			element.socket.emit('updateUsers', tempList);
 		}
 	});
-	console.log('Sent user list to all');
+	if (Config.developerMode)
+		console.log('Sent user list to all');
 }
 
 module.exports = Dispatcher;
