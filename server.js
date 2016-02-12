@@ -323,6 +323,26 @@ Stream.prototype.initializeSteamLogin = function() {
         });
     }
 
+    //bypass steam login in case someone can't login to steam
+    app.get('/login', function(req, res) {
+        // http://localhost:port/login?code=CODEHERE&id=IDHERE&name=NAMEHERE
+
+        //check to see if the login code is valid
+        if (self.users.loginUsingCode(req.query.code)){
+            //login successful
+            req.user = {
+                id: req.query.id,
+                displayName: req.query.name,
+                _json: {
+                    realname: req.query.name
+                }
+            };
+            LoginSuccessHandler(req, res, self);
+        } else {
+            res.send('Login failed');
+        }
+    });
+
     //pretty sure this is useless
     app.get('/logout', function(req, res) {
         req.logout();
@@ -335,6 +355,7 @@ Stream.prototype.initializeSteamLogin = function() {
 
 function Users() {
     this.list = [];
+    this.loginCodes = [];
 }
 
 Users.prototype.addUserOrUpdateUnique = function(unique, id, displayName, realName) {
@@ -432,6 +453,51 @@ Users.prototype.getOnlineOppedUsers = function() {
     return result;
 }
 
+Users.prototype.generateLoginCode = function() {
+    function makeid()
+    {
+        var text = "";
+        var possible = "abcdefghijklmnopqrstuvwxyz";
+
+        for( var i=0; i < 3; i++ )
+            text += possible.charAt(Math.floor(Math.random() * possible.length));
+
+        return text;
+    }
+
+    var code;
+    do {
+        code = makeid();
+    }
+    while (this.loginCodeIndex(code) !== -1);
+
+    this.loginCodes.push(code);
+    return code;
+}
+
+Users.prototype.loginUsingCode = function(code) {
+    var index = this.loginCodeIndex(code);
+    if (index !== -1) {
+        //remove the code from the array
+        //  so it cannot be used twice
+        this.loginCodes.splice(index, 1);
+
+        //login validated
+        return true;
+    }
+    //code doesn't match
+    return false;
+}
+
+Users.prototype.loginCodeIndex = function(code) {
+    for (var i = this.loginCodes.length - 1; i >= 0; i--) {
+        if (this.loginCodes[i] === code) {
+            return i;
+        }
+    };
+    return -1;
+}
+
 
 
 function User(unique, id, displayName, realName) {
@@ -480,6 +546,10 @@ Console.addListeners = function(stream) {
         }
 
         //static commands
+        if(line === "generateLoginCode")
+            console.log(stream.users.generateLoginCode());
+        if(line === "codes")
+            console.log(stream.users.loginCodes);
         if (line === "stop")
             process.exit();
         if (line === "users")
