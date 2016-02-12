@@ -283,8 +283,8 @@ Stream.prototype.initializeSteamLogin = function() {
     };
 
     passport.use(new SteamStrategy({
-            returnURL: 'http://localhost:' + Config.port + '/auth/steam/return',
-            realm: 'http://localhost:' + Config.port + '/',
+            returnURL: Config.url + ":" + Config.port + '/auth/steam/return',
+            realm: Config.url  + ":" + Config.port + '/',
             apiKey: Config.steamAPIKey
         },
         function(identifier, profile, done) {
@@ -311,7 +311,7 @@ Stream.prototype.initializeSteamLogin = function() {
     //if developer mode is enabled
     if (Config.developerMode) {
         app.get('/devlogin', function(req, res) {
-            // http://localhost:port/devlogin?id=IDHERE&displayName=DNAMEHERE&realname=RNAMEHERE
+            // url:port/devlogin?id=IDHERE&displayName=DNAMEHERE&realname=RNAMEHERE
             req.user = {
                 id: req.query.id,
                 displayName: req.query.displayName,

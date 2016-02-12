@@ -1,5 +1,8 @@
 //To use this config file, you must remove all comments and rename it to config.json
 {
+    //Web Address: url server will append to redirects
+    "url": "http://localhost",
+
     //Port: port in which the server will run off.
     "port": 3000,
 
