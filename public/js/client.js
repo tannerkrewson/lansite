@@ -281,5 +281,15 @@ socket.on('updateUsers', function(msg) {
 });
 
 socket.on('areWeOP', function(msg) {
-    isThisUserOP = msg && true;
+    opCheck = msg && true;
+    //if we're not already OP
+
+    if (!isThisUserOP && opCheck){
+        isThisUserOP = true;
+
+        mainSidebar.addButton(new Button('AdminLink', 'Admin Stream'));
+        $('#AdminLink-Button').click(function(){
+            window.open('admin', '_blank');
+        })
+    }
 });
