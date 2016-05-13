@@ -15,7 +15,7 @@ function TextBox(data) {
 //@Override
 TextBox.prototype.update = function() {
     //jquery to set the text
-    $('#' + this.unique).find('h3').html(this.text);
+    $('#' + this.unique).find('.message').html(this.text);
 }
 
 TextBox.prototype.changeText = function(text) {

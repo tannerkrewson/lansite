@@ -5,12 +5,11 @@ body {
   padding-top: 20px;
 }
 .col-xs-12 {
-  background-color: #fff;
+  /*background-color: #fff;*/
 }
 #sidebar {
   height: 100%;
   padding-right: 0;
-  padding-top: 20px;
 }
 #sidebar .nav {
   width: 95%;

@@ -6,13 +6,17 @@
 -->
 
 <template id="MatchBox">
-	<div class="jumbotron">
-		<h3 class="lead" align="left">Match Finder</h3>
-		<h4 class="matchboxempty" style="text-align:center">No one is looking for players!</h4>
-		<div class="matches">
+	<div class="panel panel-primary">
+		<div class="panel-heading">
+		    <h3 class="panel-title">Match Finder</h3>
+		</div>
+		<div class="panel-body">
+			<p class="matchboxempty" style="text-align:center">No one is looking for players!</p>
+			<div class="matches">
 
-		</div><br/>
-		<button class="btn btn-primary pull-right matchadd" type="button" data-toggle="modal" data-target="#MatchBox-Popup">+Find players</button><br/>
+			</div><br/>
+			<button class="btn btn-primary pull-right matchadd" type="button" data-toggle="modal" data-target="#MatchBox-Popup">+Find players</button><br/>
+		</div>
 	</div>
 </template>
 
