@@ -13,9 +13,23 @@ function TextBox(data) {
     Box.call(this);
     this.id = TextBox.id;
 	if (data.isConsole){
-		this.text = data.line;
+		var consoleArr = data.line.split(';');
+		this.title = consoleArr[0];
+		//remove the first element from the array
+		consoleArr.shift();
+
+		//put the string back together
+		//	this is only necessary if the user put
+		//	semicolons in their console command,
+		//	but whatever. prevents weird errors.
+		this.text = '';
+		for (var i = 0; i < consoleArr.length; i++) {
+			this.text += consoleArr[i];
+		}
+
 	} else {
 		this.text = data.text;
+		this.title = data.title;
 	}
 }
 
@@ -46,7 +60,8 @@ TextBox.addRequestListeners = function(socket, stream) {
 				//post the message
 				var tempData = {
 					isConsole: false,
-					text: msg.data.message
+					text: msg.data.message,
+					title: user.displayName + ' says: '
 				}
 				var boxUnique = stream.addBoxById('TextBox', tempData);
 				stream.sendBox(boxUnique);

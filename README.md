@@ -23,8 +23,8 @@ Lansite is web app made for smaller LAN parties. It is designed to be a simple, 
 
 ## Server Console Commands
 ###NOTE: Box names are case-sensitive.
-* add TextBox [text/HTML to display here]
-* add VoteBox [each choice separated by a semicolon here]
+* add TextBox [title];[text/HTML to display here]
+* add VoteBox question;choice1;choice2;choice3...
 * add MatchBox
 * stop
 

@@ -9,14 +9,19 @@ TextBox.prototype = Object.create(Box.prototype);
 
 function TextBox(data) {
     Box.call(this, data.id, data.unique);
+    this.title = data.title;
     this.text = data.text;
-    console.log(data);
 }
 
 //@Override
 TextBox.prototype.update = function() {
-    //jquery to set the text
-    $('#' + this.unique).find('.message').html(this.text);
+    var thisBox = $('#' + this.unique);
+
+    //set the title
+    thisBox.find('.panel-title').html(this.title);
+    
+    //set the message
+    thisBox.find('.message').html(this.text);
 }
 
 TextBox.prototype.changeText = function(text) {
