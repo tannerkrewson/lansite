@@ -50,7 +50,7 @@ TemplateBox.addRequestListeners = function(socket, stream) {
 		//check if the user is logged in
 		var user = stream.users.checkIfUserExists(msg.unique);
 		if (user) {
-			stream.requestManager.addRequest(user, function(){
+			stream.requestManager.addRequest(user, 'has sent a request.', function(){
 				//The code within this block will be ran if the
 				//    request is accepted.
 				console.log('Request accepted');
