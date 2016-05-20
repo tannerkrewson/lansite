@@ -567,7 +567,9 @@ function RequestManager() {
     this.requestList = [];
     this.adminStream = new Stream(true);
     this.adminStream.addBox(new BoxObjects['textbox']({
-        text: 'Welcome to the Admin Stream'
+        text: 'User requests will appear on this page, and you will be able to accept or deny them. Please note,'
+        + ' users can only have one request open at once, and if they make a new request, their old request will be replaced.',
+        title: 'Welcome to the Admin Stream'
     }));
 }
 
