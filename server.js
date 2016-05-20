@@ -692,6 +692,7 @@ var initialStream = new Stream(true);
 initialStream.addBox(new BoxObjects['initialbox']());
 
 var mainStream = new Stream(false);
+mainStream.addBox(new BoxObjects['matchbox']());
 Console.addListeners(mainStream);
 mainStream.initializeSteamLogin();
 

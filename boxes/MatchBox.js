@@ -16,17 +16,6 @@ function MatchBox(data) {
 	this.id = MatchBox.id;
 
 	this.matches = [];
-
-	if (data.isConsole){
-		//data.line will be whatever is after the command in the console.
-		//Example of command entered into console:
-		//
-		//	add MatchBox foobarbaz zavraboof
-		//                  ^----------------->
-	} else {
-		//This is if the box was not added via console, for example
-		//    if it was added from a request acceptance.
-	}
 }
 
 MatchBox.id = "MatchBox";
