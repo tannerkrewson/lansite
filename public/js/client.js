@@ -291,5 +291,8 @@ socket.on('areWeOP', function(msg) {
         $('#AdminLink-Button').click(function(){
             window.open('admin', '_blank');
         })
+
+        //redraw all boxes with the X
+        mainStream.redrawAllBoxes();
     }
 });
