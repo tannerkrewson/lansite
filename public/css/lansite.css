@@ -57,3 +57,8 @@ input[type="text"][readonly] {
    background-color: white;
 }
 
+.closebox {
+  position: absolute;
+  right: 24px;
+}
+
