@@ -101,7 +101,7 @@ app.get('/admin', exposeTemplates, function(req, res) {
 
 //start server
 var io = socketio.listen(app.listen(Config.port, function() {
-    console.log('Lansite is now running on port ' + app.get('port') + '. Type "stop" to close.');
+    console.log('Lansite is now running on port ' + Config.port + '. Type "stop" to close.');
 }));
 
 
