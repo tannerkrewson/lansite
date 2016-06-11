@@ -24,10 +24,10 @@ Lansite is web app made for smaller LAN parties. It is designed to be a simple, 
 ## Install
 1. Clone this repo however you prefer.
 2. Make sure you have [Node.js](https://nodejs.org/) installed on your system.
-2. Open CMD and run: npm install
+2. Open CMD and run: `npm install`
 3. Make a copy of _template_config.json called config.json
 4. Change the settings as you like, and remove the comments.
-5. Finally, to open the server, run: node start
+5. Finally, to open the server, run: `npm start`
 6. Visit localhost:port in your browser to test.
 
 ## Config
