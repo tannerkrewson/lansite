@@ -1,10 +1,12 @@
 # Lansite
 
+![](https://cdn.pbrd.co/images/1BNblLcH.png)![](https://cdn.pbrd.co/images/1BNcQF84.png)
+
 Lansite is web app made for smaller LAN parties. It is designed to be a simple, central information hub for all attendees.
 
 ## About
 
-* Programmed with JavaScript and Bootstrap on the front end and NodeJS with Express, Handlebars, and Passport on the back end.
+* Programmed with JavaScript and Bootstrap on the front end and NodeJS with Express, Socket.io, Handlebars, and Passport on the back end.
 * Fully modular plugin system that allows easy creation of custom plugins, called "Boxes".
 * Uses Steam authentication for ease of access and security.
 
@@ -20,6 +22,16 @@ Lansite is web app made for smaller LAN parties. It is designed to be a simple, 
 4. Change the settings as you like, and remove the comments.
 5. Finally, to open the server, run: node server.js
 6. Visit localhost:port in your browser to test.
+
+## Config
+* Web Address (string): url server will append to redirects.
+* Port (int): Port in which the server will run off.
+* Developer Mode (boolean): Enables features that may be insecure to run in a production situation.
+  Features:
+  * Non-Steam accounts for testing: Go to url:port/devlogin?id=IDHERE&displayName=DNAMEHERE to login to a test account
+  * More console messages
+* Steam API Key (string): Required. Grab one for yourself here: http://steamcommunity.com/dev/apikey
+* Auto OP First User (boolean): Make the first user that logs into Lansite the admin
 
 ## Server Console Commands
 ###NOTE: Box names are case-sensitive.
@@ -37,4 +49,3 @@ Lansite is web app made for smaller LAN parties. It is designed to be a simple, 
 6. Copy "Lansite/boxes/_TemplateBox.js" and rename it to "FooBox.js". This will be our server-side script.
 7. Follow the instructions inside the template to get it setup, and add your code.
 8. You can test your code by running the console command "add FooBox [your arguments here]" in the server console to add the box to all connected clients' streams.
-
