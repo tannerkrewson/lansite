@@ -1,6 +1,6 @@
 # Lansite
 
-![](https://cdn.pbrd.co/images/1BNblLcH.png)![](https://cdn.pbrd.co/images/1BNcQF84.png)
+![](https://cdn.pbrd.co/images/1BO4o3dm.png)![](https://cdn.pbrd.co/images/1BO5ubtv.png)
 
 Lansite is web app made for smaller LAN parties. It is designed to be a simple, central information hub for all attendees.
 
