@@ -21,6 +21,15 @@ $(document).ready(function() {
     });
 });
 
+//auto-updating clock
+$(function(){
+  setInterval(function(){
+    var currentTime = $('.currenttime');
+    //put time into the div
+    currentTime.text(moment().format('h:mma'));     
+  },1000);
+});
+
 
 //
 //  OBJECTS

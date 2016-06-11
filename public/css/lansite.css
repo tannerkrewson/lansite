@@ -1,5 +1,5 @@
 body {
-  padding-top: 51px;  
+  padding-top: 51px;
 }
 .text-center {
   padding-top: 20px;
@@ -17,6 +17,14 @@ body {
 #sidebar li {
   border:0 #f2f2f2 solid;
   border-bottom-width:1px;
+}
+.currenttime {
+  display: inline-block;
+  float: right;
+}
+.navbar-header {
+  width: 100%;
+  margin-left: 0px !important;
 }
 
 /* collapsed sidebar styles */
@@ -61,4 +69,3 @@ input[type="text"][readonly] {
   position: absolute;
   right: 24px;
 }
-
