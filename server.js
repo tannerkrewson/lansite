@@ -454,12 +454,16 @@ Users.prototype.getOnlineOppedUsers = function() {
 }
 
 Users.prototype.generateLoginCode = function() {
+
+    //length of the login code
+    const codeLength = 5;
+
     function makeid()
     {
         var text = "";
         var possible = "abcdefghijklmnopqrstuvwxyz";
 
-        for( var i=0; i < 3; i++ )
+        for( var i=0; i < codeLength; i++ )
             text += possible.charAt(Math.floor(Math.random() * possible.length));
 
         return text;
@@ -530,7 +534,7 @@ Console.addListeners = function(stream) {
     var stdin = process.openStdin();
     stdin.addListener("data", function(d) {
         //string of what was entered into the console
-        var line = d.toString().trim();
+        var line = d.toString().trim().toLowerCase();
 
         //automatic add commands
         if (line.startsWith('add ')) {
@@ -544,20 +548,69 @@ Console.addListeners = function(stream) {
                 stream.addBoxAndSend(new BoxObjects[lineArr[1].toLowerCase()](data));
             }
         }
-
         //static commands
-        if(line === "generateLoginCode")
-            console.log(stream.users.generateLoginCode());
-        if(line === "codes")
-            console.log(stream.users.loginCodes);
-        if (line === "stop")
+        else if (line === "help") {
+          console.log('');
+          console.log('Lansite Command List:');
+          console.log('');
+
+          var commandList = [];
+
+          //add commands
+          BoxNames.forEach(function(boxName) {
+            commandList.push('add ' + boxName);
+          });
+
+          commandList.push('help');
+          commandList.push('view codes');
+          commandList.push('view users');
+          commandList.push('view boxes');
+          commandList.push('view requests');
+          commandList.push('stop');
+          commandList.push('generatelogincode');
+
+          commandList.sort();
+
+          commandList.forEach(function(cmd) {
+            console.log(cmd);
+          });
+          console.log('');
+          console.log('Check the readme for more information on the function of each command.');
+          console.log('');
+
+        }
+        else if (line.startsWith("view ")) {
+          var cmd = line.substring(5);
+          if (cmd === "codes") {
+              console.log(stream.users.loginCodes);
+          } else if (cmd === "users") {
+              console.log(stream.users.getAllUsers());
+          } else if (cmd === "boxes") {
+              console.log(stream.listAllBoxes());
+          } else if (cmd === "requests") {
+              console.log(stream.requestManager.getRequests());
+          } else {
+            console.log('Invalid view command. Type "help" for a list of commands.');
+          }
+        }
+        else if (line === "stop") {
             process.exit();
-        if (line === "users")
-            console.log(stream.users.getAllUsers());
-        if (line === "boxes")
-            console.log(stream.listAllBoxes());
-        if (line === "requests")
-            console.log(stream.requestManager.getRequests());
+        }
+        else if (line === "generatelogincode") {
+            console.log('');
+            console.log('One-time use code:')
+            var loginCode = stream.users.generateLoginCode();
+            console.log(loginCode);
+            console.log('');
+            console.log('Example usage:');
+            console.log('http://localhost:port/login?code=' + loginCode + '&id=IDHERE&name=NAMEHERE');
+            console.log('');
+        }
+        else {
+          console.log('');
+          console.log('Invalid command. Type "help" for a list of commands.');
+          console.log('');
+        }
     });
 }
 

@@ -7,7 +7,7 @@
     "port": 3000,
 
     //Developer Mode: enables features that may be insecure to run in a production situation
-    "developerMode": true,
+    "developerMode": false,
 
     //Steam API Key: Grab one for yourself here: http://steamcommunity.com/dev/apikey
     "steamAPIKey": "YOUR API KEY HERE",

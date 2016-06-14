@@ -16,6 +16,7 @@ Lansite is web app made for smaller LAN parties. It is designed to be a simple, 
 * Easy to install, configure and launch
 * Requests from the attendees can be approved or denied from the Admin Stream to prevent spam
 * Add messages or votes easily using the buttons in the sidebar
+* If someone doesn't have a Steam account, or your LAN does not have internet, you can create one-time use login codes.
 
 ####For programmers:
 * Programmed with JavaScript and Bootstrap on the front end and NodeJS with Express, Socket.io, Handlebars, and Passport on the back end
@@ -41,12 +42,16 @@ Lansite is web app made for smaller LAN parties. It is designed to be a simple, 
 * Auto OP First User (boolean): Make the first user that logs into Lansite the admin
 
 ## Server Console Commands
-* add TextBox [title];[text/HTML to display here]
-* add VoteBox question;choice1;choice2;choice3...
-* add MatchBox
-* stop
-
-####NOTE: Box names are case-sensitive.
+* `help`: View a list of commands
+* `stop`: Exit the server. Please note that all data is deleted once the server is closed. Users will have to relogin once restarted.
+* `add matchbox`
+* `add textbox [title];[text/HTML to display here]`
+* `add votebox [question];[choice1];[choice2];[choice3]...`
+* `generatelogincode`: Generates a code that can be used to by a users to login. This maybe helpful if, for example, someone does not have a Steam account, or your LAN does not have internet.
+* `view boxes`: View all of the boxes in the stream.
+* `view codes`: View all of the active login codes generated using the `generatelogincode` command. Codes are one-time use, and will be removed from this list after usage.
+* `view requests`: View all of open requests. These are also displayed in the admin stream.
+* `view users`: View all users.
 
 ## Included Boxes
 * VoteBox: Give your attendees a choice in what game to play next, what to eat, etc.
