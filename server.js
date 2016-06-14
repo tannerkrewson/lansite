@@ -88,12 +88,20 @@ passport.deserializeUser(function(obj, done) {
 
 //url mapping
 app.get('/', exposeTemplates, function(req, res) {
-    res.render('home');
+  res.render('home', {
+      layout: 'nonstream'
+  });
+});
+
+app.get('/main', exposeTemplates, function(req, res) {
+  res.render('main', {
+      layout: 'stream'
+  });
 });
 
 app.get('/admin', exposeTemplates, function(req, res) {
-    res.render('home', {
-        layout: 'admin'
+    res.render('admin', {
+        layout: 'stream'
     });
 });
 
@@ -294,8 +302,8 @@ Stream.prototype.initializeSteamLogin = function() {
             maxAge: 604800000 // Expires in one week
         });
 
-        //redirect home
-        res.redirect('/');
+        //redirect to the main stream
+        res.redirect('/main');
     };
 
     passport.use(new SteamStrategy({

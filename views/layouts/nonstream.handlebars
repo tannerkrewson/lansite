@@ -8,27 +8,17 @@
 
 <body>
     <div class="container">
-        {{#each popups}}
-            {{{this.template}}}
-        {{/each}}
         {{>navbar}}
         <br>
         <br>
-        <div class="row">
-            <div id="stream" class="col-xs-12 col-sm-12">
-                {{{body}}}
-            </div>
-        </div>
+        {{{body}}}
         <footer class="footer">
             <p>Lansite by Tanner Krewson - <a href="https://github.com/tannerkrewson/lansite">View on Github</a></p>
         </footer>
         <!--/.row-->
     </div>
     <!-- /container -->
-    {{>foot}}
-    {{#each boxes}}
-        {{{this.template}}}
-    {{/each}}
+    {{>scripts}}
 
     </script>
 </body>
