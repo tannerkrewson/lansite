@@ -21,7 +21,7 @@ MatchBox.prototype.updateData = function(data) {
 
 //@Override
 MatchBox.prototype.show = function() {
-    
+
     //Runs the parent show function
     Box.prototype.show.call(this);
 
@@ -32,7 +32,7 @@ MatchBox.prototype.show = function() {
     var popup = $('#MatchBox-Popup');
     var button = $('#MatchBox-Popup-submit');
     var self = this;
-    var userUnique = Cookies.get('unique');
+    var userId = Cookies.get('id');
     button.on('click', function(event) {
         //get the title from the input box
         var game = popup.find('.matchpopupgame').val();
@@ -46,7 +46,6 @@ MatchBox.prototype.show = function() {
 
         SendToServer.requestFromIndBox(self.unique, 'newmatch', {
             'game': game,
-            'hostUnique': userUnique,
             'min': min,
             'max': max
         });
@@ -69,7 +68,7 @@ MatchBox.prototype.drawMatches = function() {
 
     var self = this;
     var thisMatchBox = $('#' + this.unique);
-    var userUnique = Cookies.get('unique');
+    var userId = Cookies.get('id');
 
     //If there are no matches
     if (this.matches.length === 0){
@@ -112,7 +111,7 @@ MatchBox.prototype.drawMatches = function() {
 
         //determine which button to show
         // if this user is in the match
-        if (this.checkIfUserInMatch(userUnique, this.matches[i])) {
+        if (this.checkIfUserInMatch(userId, this.matches[i])) {
             //display the cancel button, hide the accept button
             acceptButton.hide();
             cancelButton.show();
@@ -148,7 +147,7 @@ MatchBox.prototype.drawMatches = function() {
 }
 
 MatchBox.prototype.updateMatchString = function(match) {
-    var result = match.host.displayName + ' wants to play ' + match.game;
+    var result = match.host.username + ' wants to play ' + match.game;
     $('#' + match.unique).children('.matchstring').html(result);
 }
 
@@ -178,12 +177,12 @@ MatchBox.prototype.updateMatchCounter = function(match) {
         //for each user in the users array for this match
         match.users.forEach(function(user) {
             //prepare the string
-            var username = user.displayName;
+            var username = user.username;
 
             //append the string to the list
             thisDropdown.append(
                 $('<li>').append(
-                    $('<a>').attr('href', 'http://steamcommunity.com/profiles/' + user.id).append(
+                    $('<a>').attr('href', 'http://steamcommunity.com/profiles/' + user.steamId).append(
                         $('<span>').attr('class', 'tab').append(username)
                     )));
         });
@@ -191,9 +190,9 @@ MatchBox.prototype.updateMatchCounter = function(match) {
 
 }
 
-MatchBox.prototype.checkIfUserInMatch = function(userUnique, match) {
+MatchBox.prototype.checkIfUserInMatch = function(userId, match) {
     for (var i = match.users.length - 1; i >= 0; i--) {
-        if (match.users[i].unique === userUnique) {
+        if (match.users[i].id === parseInt(userId)) {
             return true;
         }
     };
@@ -202,7 +201,7 @@ MatchBox.prototype.checkIfUserInMatch = function(userUnique, match) {
 
 MatchBox.addButtons = function(sidebar) {}
 
-/*  
+/*
 	You may send information to the server using the SendToServer
     object, like so:
 

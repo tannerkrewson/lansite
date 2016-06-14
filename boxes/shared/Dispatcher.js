@@ -38,7 +38,7 @@ Dispatcher.sendNewBoxToAll = function(box, users) {
 
 Dispatcher.sendUpdatedBoxToAll = function(box, users) {
 
-	//TODO: Make sure the box passed is NOT a new box   
+	//TODO: Make sure the box passed is NOT a new box
 	users.list.forEach(function(element) {
 		if (element.socket !== null) {
 			element.socket.emit('updateBox', box);
@@ -76,15 +76,16 @@ Dispatcher.sendUserListToAll = function(users) {
 
 	//make a new list of the users that doesnt contain the socket
 	//    because that breaks it
+	//		and that doesn't contain the users' secrets, because
+	//		that would be a security hazard
 	var tempList = [];
 	users.list.forEach(function(element) {
 		//if the user is online
 		if (element.socket !== null) {
 			tempList.push({
 				id: element.id,
-				unique: element.unique,
-				displayName: element.displayName,
-				realName: element.realName,
+				steamId: element.steamId,
+				username: element.username,
 				isOp: element.isOp
 			})
 		}

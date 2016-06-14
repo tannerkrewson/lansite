@@ -18,7 +18,7 @@ Box.prototype.addResponseListeners = function(socket, stream) {
 	socket.on(self.unique + '-request-removebox', function(msg){
 		console.log('Request received');
 		//check if the user is logged in
-		var user = stream.users.checkIfUserExists(msg.unique);
+		var user = stream.users.findUser(msg.id);
 		if (user) {
 			stream.requestManager.addRequest(user, 'wants to close ' + self.id, function(){
 				stream.removeBox(self.unique);

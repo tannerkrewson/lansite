@@ -23,28 +23,28 @@ MatchBox.id = "MatchBox";
 MatchBox.prototype.addResponseListeners = function(socket, stream) {
 	//Runs the parent addResponseListeners function
 	Box.prototype.addResponseListeners.call(this, socket, stream);
-	
+
 	var self = this;
 	socket.on(self.unique + '-accept', function(msg){
 		//check if the user is logged in
-		var user = stream.users.checkIfUserExists(msg.unique);
+		var user = stream.users.checkCredentials(msg.id, msg.secret);
 		if (user) {
 			//recreate user object to prevent maximum call stack size error
-			//TODO: Find a more elegant solution
+			//	and to remove the secret from the user objects, to prevent
+			//	it from being sent to everyone, posing a security risk
 			var jsonUser = {
-				unique: user.unique,
 				id: user.id,
-				displayName: user.displayName,
-				realName: user.realName,
+				username: user.username,
+				steamId: user.steamId,
 				isOp: user.isOp
 			}
 			var match = self.getMatchByUnique(msg.data.matchUnique);
 
-			//if the user is already in the match, this will not be null
-			var checkUser = match.checkIfUserInMatch(jsonUser.unique);
+			//if the user is not already in the match, this will be false
+			var checkUser = match.checkIfUserInMatch(jsonUser.id);
 
 			//if the match exists and the user was not found in the match
-			if (match !== null && checkUser === null){
+			if (match !== null && !checkUser){
 				//add them to this match
 				match.addUser(jsonUser);
 			}
@@ -55,17 +55,17 @@ MatchBox.prototype.addResponseListeners = function(socket, stream) {
 	})
 	socket.on(self.unique + '-cancel', function(msg){
 		//check if the user is logged in
-		var user = stream.users.checkIfUserExists(msg.unique);
+		var user = stream.users.checkCredentials(msg.id, msg.secret);
 		if (user) {
 			var match = self.getMatchByUnique(msg.data.matchUnique);
 
 			//if the user is already in the match, this will not be null
-			var userToRemove = match.checkIfUserInMatch(user.unique);
+			var userToRemove = match.checkIfUserInMatch(user.id);
 
 			//if the match exists and the user was found in the match
 			if (match !== null && userToRemove !== null){
 				//check to see if the host is droping out
-				if (userToRemove.unique === match.host.unique){
+				if (userToRemove.id === match.host.id){
 					//delete the whole match
 					self.removeMatch(match);
 				} else {
@@ -81,20 +81,20 @@ MatchBox.prototype.addResponseListeners = function(socket, stream) {
 	socket.on(self.unique + '-request-newmatch', function(msg){
 		console.log('Request received');
 		//check if the user is logged in
-		var user = stream.users.checkIfUserExists(msg.unique);
+		var user = stream.users.checkCredentials(msg.id, msg.secret);
 		if (user) {
 			//recreate user object to prevent maximum call stack size error
-			//TODO: Find a more elegant solution
+			//	and to remove the secret from the user objects, to prevent
+			//	it from being sent to everyone, posing a security risk
 			var jsonUser = {
-				unique: user.unique,
 				id: user.id,
-				displayName: user.displayName,
-				realName: user.realName,
+				username: user.username,
+				steamId: user.steamId,
 				isOp: user.isOp
 			}
-	        var game = msg.data.game;
-	        var min = msg.data.min;
-	        var max = msg.data.max;
+      var game = msg.data.game;
+      var min = msg.data.min;
+      var max = msg.data.max;
 			stream.requestManager.addRequest(jsonUser, 'wants to find players for ' + game, function(){
 				self.addMatch(game, jsonUser, min, max);
 				Dispatcher.sendUpdatedBoxToAll(self, stream.users);
@@ -164,18 +164,18 @@ function Match(game, host, min, max){
 	this.users.push(this.host);
 }
 
-Match.prototype.checkIfUserInMatch = function(userUnique) {
+Match.prototype.checkIfUserInMatch = function(userId) {
     for (var i = this.users.length - 1; i >= 0; i--) {
-        if (this.users[i].unique === userUnique) {
+        if (this.users[i].id === parseInt(userId)) {
             return this.users[i];
         }
     };
-    return null;
+    return false;
 }
 
 Match.prototype.addUser = function(userToAdd){
 	//if the user is already in the match, this will not be null
-	var user = this.checkIfUserInMatch(userToAdd.unique);
+	var user = this.checkIfUserInMatch(userToAdd.id);
 
 	//check if the match is full (if there is a max)
 	var notFull = true;
@@ -183,17 +183,17 @@ Match.prototype.addUser = function(userToAdd){
 		notFull = this.users.length < this.max;
 	}
 
-	if (user === null && notFull){
+	if (!user && notFull){
 		this.users.push(userToAdd);
 	}
 }
 
 Match.prototype.removeUser = function(userToRemove){
 	//if the user is already in the match, this will not be null
-	var user = this.checkIfUserInMatch(userToRemove.unique);
+	var user = this.checkIfUserInMatch(userToRemove.id);
 
 	//if the user exists in this match
-	if (user !== null){
+	if (user){
 		//remove them
 		var index = this.users.indexOf(userToRemove);
 		if (index > -1) {

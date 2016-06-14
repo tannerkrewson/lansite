@@ -228,8 +228,8 @@ Stream.prototype.getBoxIndexByUnique = function(boxUnique) {
     return -1;
 }
 
-Stream.prototype.prepNewUser = function(userUnique) {
-    var user = this.users.checkIfUserExists(userUnique)
+Stream.prototype.prepNewUser = function(id) {
+    var user = this.users.findUser(id)
 
     //if the user exists in this stream
     if (user !== -1) {
@@ -255,26 +255,42 @@ Stream.prototype.initializeSteamLogin = function() {
     var LoginSuccessHandler = function(req, res, stream) {
         //this is ran when the user successfully logs into steam
         var user = req.user;
-        var unique;
+        
+        var id;
+        var secret;
+        var username = req.user.displayName;
+        var steamId = req.user.id;
 
         //if the user already exists
-        var userAlreadyExists = stream.users.checkIfUserExistsByID(req.user.id);
+        var userAlreadyExists;
+        var foundUser = stream.users.findUserBySteamId(steamId);
+        if (foundUser) {
+            userAlreadyExists = stream.users.checkCredentials(foundUser);
+        } else {
+            userAlreadyExists = false;
+        }
 
         if (userAlreadyExists){
-            //reuse the unique
-            unique = userAlreadyExists.unique;
+            //reuse the old info
+            id = foundUser.id;
+            secret = foundUser.secret;
+            steamId = foundUser.steamId;
         } else {
-            //generate the user's unique identifier that will be use
-            //    to identify them once they are redirected to the
-            //    main stream.
-            unique = crypto.randomBytes(20).toString('hex');
+            //generate the user's id and secret
+            id = stream.users.getNextUserId();
+            secret = crypto.randomBytes(20).toString('hex');
         }
 
         //add the user to the stream and await their return
-        stream.users.addUserOrUpdateUnique(unique, user.id, user.displayName, user._json.realname);
+        stream.users.addOrUpdateUserInfo(secret, id, username, steamId);
+
+        //set a cookie that allows the user to know its own id
+        res.cookie('id', id, {
+            maxAge: 604800000 // Expires in one week
+        });
 
         //set a cookie that will act as the user's login token
-        res.cookie('unique', unique, {
+        res.cookie('secret', secret, {
             maxAge: 604800000 // Expires in one week
         });
 
@@ -311,13 +327,9 @@ Stream.prototype.initializeSteamLogin = function() {
     //if developer mode is enabled
     if (Config.developerMode) {
         app.get('/devlogin', function(req, res) {
-            // url:port/devlogin?id=IDHERE&displayName=DNAMEHERE&realname=RNAMEHERE
+            // url:port/devlogin?username=NAMEHERE
             req.user = {
-                id: req.query.id,
-                displayName: req.query.displayName,
-                _json: {
-                    realname: req.query.realname
-                }
+                displayName: req.query.username
             };
             LoginSuccessHandler(req, res, self);
         });
@@ -325,17 +337,13 @@ Stream.prototype.initializeSteamLogin = function() {
 
     //bypass steam login in case someone can't login to steam
     app.get('/login', function(req, res) {
-        // http://localhost:port/login?code=CODEHERE&id=IDHERE&name=NAMEHERE
+        // http://localhost:port/login?code=CODEHERE&username=NAMEHERE
 
         //check to see if the login code is valid
         if (self.users.loginUsingCode(req.query.code)){
             //login successful
             req.user = {
-                id: req.query.id,
-                displayName: req.query.name,
-                _json: {
-                    realname: req.query.name
-                }
+                displayName: req.query.username
             };
             LoginSuccessHandler(req, res, self);
         } else {
@@ -356,63 +364,75 @@ Stream.prototype.initializeSteamLogin = function() {
 function Users() {
     this.list = [];
     this.loginCodes = [];
+
+    //rough user count, used for ids
+    this.userCount = 0;
 }
 
-Users.prototype.addUserOrUpdateUnique = function(unique, id, displayName, realName) {
-    for (element of this.list) {
-        //if this user already exists
-        if (element.id === id) {
-            //update their info (i don't update realName)
-            element.unique = unique;
-            element.displayName = displayName;
+Users.prototype.addOrUpdateUserInfo = function(secret, id, username, steamId) {
+    //if this user already exists
+    var element = this.checkCredentials(id, secret);
+    if (element) {
+        //update their info
+        element.username = username;
+        element.steamId = steamId;
 
-            //should already be null, just precautionary
-            element.socket = null;
-            return element;
-        }
+        //should already be null, just precautionary
+        element.socket = null;
+        return element;
     }
 
     //ran if the user does not already exist
-    var tempUser = new User(unique, id, displayName, realName);
+    var tempUser = new User(id, secret, username, steamId);
     this.list.push(tempUser);
     return tempUser;
 }
 
-Users.prototype.admitUserIfExists = function(unique, socket) {
-    if (this.checkIfUserExists(unique)) {
-        //user found! update their info
-        element.socket = socket;
-        return element;
+Users.prototype.connectUser = function(id, secret, socket) {
+    var user = this.checkCredentials(id, secret);
+    if (user) {
+        //user found and verified, update their info.
+        user.socket = socket;
+        return user;
     }
 
     //user not found
-    //TODO: Switch over to a system thats better than just using null
-    return null;
-}
-
-Users.prototype.checkIfUserExistsByID = function(id) {
-    for (element of this.list) {
-        if (element.id === id) {
-            return element;
-        }
-    }
     return false;
 }
 
-Users.prototype.checkIfUserExists = function(unique) {
-    for (element of this.list) {
-        if (element.unique === unique) {
-            return element;
-        }
-    }
-    return false;
+Users.prototype.findUser = function(id) {
+  for (element of this.list) {
+      if (element.id === parseInt(id)) {
+          return element;
+      }
+  }
+  return false;
 }
 
-Users.prototype.checkIfUserIsOP = function(unique) {
-    for (element of this.list) {
-        if (element.unique === unique) {
-            return element.isOp;
-        }
+Users.prototype.findUserBySteamId = function(steamId) {
+  for (element of this.list) {
+      if (element.streamId === steamId) {
+          return element;
+      }
+  }
+  return false;
+}
+
+Users.prototype.checkCredentials = function(id, secret) {
+  var user = this.findUser(id);
+  //if the user exists and the secret is correct
+  if (user && element.secret === secret) {
+    return user;
+  }
+
+  //otherwise
+  return false;
+}
+
+Users.prototype.checkIfUserIsOP = function(id) {
+    var user = this.findUser(id);
+    if (user){
+      return user.isOp;
     }
     return false;
 }
@@ -425,12 +445,7 @@ Users.prototype.removeUser = function(userToRemove) {
 }
 
 Users.prototype.getAllUsers = function() {
-    /*var result = '';
-    this.list.forEach(function(element) {
-        result += element.unique + "\n";
-    });
-    return result;*/
-    return this.list;
+  return this.list;
 }
 
 Users.prototype.getOnlineUsers = function() {
@@ -502,16 +517,21 @@ Users.prototype.loginCodeIndex = function(code) {
     return -1;
 }
 
+Users.prototype.getNextUserId = function() {
+  this.userCount++;
+  return this.userCount;
+}
 
 
-function User(unique, id, displayName, realName) {
-    this.unique = unique;
+
+function User(id, secret, username, steamId) {
     this.socket = null;
+    this.isOp = false;
 
     this.id = id;
-    this.displayName = displayName;
-    this.realName = realName;
-    this.isOp = false;
+    this.secret = secret;
+    this.username = username;
+    this.steamId = steamId; //should be null if not a steam account
 }
 
 User.prototype.isOnline = function() {
@@ -636,15 +656,15 @@ RequestManager.prototype.addRequest = function(userThatMadeRequest, requestStrin
 
     //since users can only have one request open at a time
     //check to see if they have a request open already
-    var prevReq = this.userHasOpenRequest(userThatMadeRequest.unique);
-    if (prevReq !== null) {
+    var prevReq = this.userHasOpenRequest(userThatMadeRequest.id);
+    if (prevReq) {
         //deny their open request
         this.handleRequest(prevReq, false);
     }
 
     //create a request box on the admin stream
     var boxsUnique = this.adminStream.addBox(new BoxObjects['requestbox']({
-        text: userThatMadeRequest.displayName + ' ' + requestString,
+        text: userThatMadeRequest.username + ' ' + requestString,
     }));
     this.adminStream.sendBox(boxsUnique, this);
 
@@ -705,13 +725,13 @@ RequestManager.prototype.getIndexByUnique = function(requestUnique) {
     return -1;
 }
 
-RequestManager.prototype.userHasOpenRequest = function(userUnique) {
+RequestManager.prototype.userHasOpenRequest = function(id) {
     for (var i = this.requestList.length - 1; i >= 0; i--) {
-        if (this.requestList[i].user.unique === userUnique) {
+        if (this.requestList[i].user.id === id) {
             return this.requestList[i].unique;
         };
     };
-    return null;
+    return false;
 }
 
 
@@ -759,10 +779,9 @@ io.on('connection', function(socket) {
 
     //sent by client if it detects it has a valid token in it's cookies
     socket.on('login', function(msg) {
-        var user = mainStream.users.admitUserIfExists(msg.unique, socket);
+        var user = mainStream.users.connectUser(msg.id, msg.secret, socket);
 
-        //user will be null if it failed to find the user
-        if (user !== null) {
+        if (user) {
             console.log('User successfully validated');
 
             //check to see if we should set the user to OP
@@ -770,7 +789,7 @@ io.on('connection', function(socket) {
                 user.op();
             }
 
-            mainStream.prepNewUser(user.unique);
+            mainStream.prepNewUser(user.id);
 
             //add the socket listeners to the user for all of the current boxes
             for (var i = mainStream.boxes.length - 1; i >= 0; i--) {
@@ -778,7 +797,7 @@ io.on('connection', function(socket) {
             };
 
             socket.on('disconnect', function() {
-                console.log(user.displayName + ' disconnected');
+                console.log(user.username + ' disconnected');
                 user.socket = null;
                 //mainStream.users.removeUser(user);
 
@@ -793,14 +812,14 @@ io.on('connection', function(socket) {
 
     socket.on('adminStreamLogin', function(msg) {
         //check to see if the user exists in the main stream and is admin
-        var user = mainStream.users.checkIfUserExists(msg.unique);
+        var user = mainStream.users.checkCredentials(msg.id, msg.secret);
         if (user.isOp){
-            console.log(user.displayName + ' has logged in as admin');
+            console.log(user.username + ' has logged in as admin');
             var adminStream = mainStream.requestManager.adminStream;
-            var userUnique = msg.unique;
-            adminStream.users.addUserOrUpdateUnique(userUnique);
-            var adminUser = adminStream.users.admitUserIfExists(userUnique, socket);
-            adminStream.prepNewUser(userUnique, mainStream);
+
+            var adminUser = adminStream.users.addOrUpdateUserInfo(user.secret, user.id, user.displayName, user.steamId);
+            adminUser = adminStream.users.connectUser(adminUser.id, adminUser.secret, socket);
+            adminStream.prepNewUser(adminUser.id);
 
             //add the socket listeners to the user for all of the current boxes
             for (var i = adminStream.boxes.length - 1; i >= 0; i--) {
@@ -808,14 +827,14 @@ io.on('connection', function(socket) {
             };
 
         } else {
-            console.log(user.displayName + ' failed to log in as admin');
+            console.log(user.username + ' failed to log in as admin');
         }
 
 
     });
 
     socket.on('areWeOP', function(msg) {
-        if (mainStream.users.checkIfUserIsOP(msg.unique)){
+        if (mainStream.users.checkIfUserIsOP(msg.id)){
             socket.emit('areWeOP', true);
         } else {
             socket.emit('areWeOP', false);

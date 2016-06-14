@@ -120,7 +120,7 @@ VoteBox.prototype.redrawChoices = function(){
 
     var self = this;
     var thisVoteBox = $('#' + this.unique);
-    var userUnique = Cookies.get('unique');
+    var userId = Cookies.get('id');
 
     //loop through each choice and add them
     for (var i = 0; i < this.choices.length; i++) {
@@ -146,7 +146,7 @@ VoteBox.prototype.redrawChoices = function(){
         //check the box if the user has already voted for it
         var hasAlreadyVoted = false;
         for (var j = this.choices[i].votedBy.length - 1; j >= 0; j--) {
-            if (this.choices[i].votedBy[j].unique === userUnique) {
+            if (this.choices[i].votedBy[j].id === parseInt(userId)) {
                 hasAlreadyVoted = true;
                 break;
             }
@@ -207,12 +207,12 @@ VoteBox.prototype.updateChoiceVotes = function(choice) {
         //for each user in the votedBy array for this choice
         choice.votedBy.forEach(function(user) {
             //prepare the string
-            var username = user.displayName;
+            var username = user.username;
 
             //append the string to the list
             thisDropdown.append(
                 $('<li>').append(
-                    $('<a>').attr('href', 'http://steamcommunity.com/profiles/' + user.id).append(
+                    $('<a>').attr('href', 'http://steamcommunity.com/profiles/' + user.steamId).append(
                         $('<span>').attr('class', 'tab').append(username)
                     )));
         });

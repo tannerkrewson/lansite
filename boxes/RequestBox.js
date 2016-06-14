@@ -36,7 +36,7 @@ RequestBox.prototype.addAdminResponseListeners = function(socket, reqMan) {
 
 	socket.on(self.unique + '-handle', function(msg) {
 		//if the user exists in the admin stream
-		if (adminStream.users.checkIfUserExists(msg.unique)) {
+		if (adminStream.users.checkCredentials(msg.id, msg.secret)) {
 			//grab the corresponding request that is stored
 			var reqUnique = msg.data.unique;
 			var reqIndex = reqMan.getIndexByUnique(reqUnique);

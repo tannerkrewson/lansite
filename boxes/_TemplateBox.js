@@ -44,11 +44,11 @@ TemplateBox.prototype.addResponseListeners = function(socket, stream) {
 }
 
 TemplateBox.addRequestListeners = function(socket, stream) {
-	socket.on('RequestVote', function(msg){
+	socket.on('request-requestname', function(msg){
 		console.log('Request received');
 		console.log(msg);
 		//check if the user is logged in
-		var user = stream.users.checkIfUserExists(msg.unique);
+		var user = stream.users.checkCredentials(msg.id, msg.secret);
 		if (user) {
 			stream.requestManager.addRequest(user, 'has sent a request.', function(){
 				//The code within this block will be ran if the

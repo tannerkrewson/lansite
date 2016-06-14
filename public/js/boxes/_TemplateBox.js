@@ -24,7 +24,7 @@ TemplateBox.prototype.updateData = function(data) {
 
 //@Override
 TemplateBox.prototype.show = function() {
-    
+
     //Runs the parent show function
     Box.prototype.show.call(this);
 
@@ -43,16 +43,20 @@ TemplateBox.prototype.update = function() {
 
     //Access to this box on the page
     var thisTemplateBox = $('#' + this.unique);
-    
+
     //Place any custom code here
-    
+
 }
 
 TemplateBox.addButtons = function(sidebar) {
-    sidebar.addButton(new Button('TemplateBox', 'Do Something'));
+    sidebar.addButton(new Button('TemplateBox', 'Create TemplateBox'));
+
+    //Do something, like setup the Submit button for a popup that allows
+    //  the user to enter in info to make TemplateBox
+
 }
 
-/*  
+/*
 	You may send information to the server using the SendToServer
     object, like so:
 

@@ -26,7 +26,7 @@ $(function(){
   setInterval(function(){
     var currentTime = $('.currenttime');
     //put time into the div
-    currentTime.text(moment().format('h:mma'));     
+    currentTime.text(moment().format('h:mma'));
   },1000);
 });
 
@@ -97,7 +97,7 @@ Sidebar.prototype.updateUsers = function() {
     this.clearUsers();
     this.users.forEach(function(user) {
         //prepare the string
-        var username = user.displayName;
+        var username = user.username;
         if (user.isOp) {
             username += ' [OP]';
         }
@@ -105,7 +105,7 @@ Sidebar.prototype.updateUsers = function() {
         //append the string to the list
         $('#sidebar ul').append(
             $('<li>').append(
-                $('<a>').attr('href', 'http://steamcommunity.com/profiles/' + user.id).append(
+                $('<a>').attr('href', 'http://steamcommunity.com/profiles/' + user.steamId).append(
                     $('<span>').attr('class', 'tab').append(username)
                 )));
     });
@@ -208,7 +208,8 @@ function SendToServer() {}
 
 SendToServer.generic = function(event, data){
     socket.emit(event, {
-        unique: Cookies.get('unique'),
+        id: Cookies.get('id'),
+        secret: Cookies.get('secret'),
         data: data
     });
 }
@@ -252,7 +253,7 @@ $(document).ready(function() {
 //attempt to login using the token from cookies, if it exists
 if (window.location.href.endsWith('admin')) {
     SendToServer.generic('adminStreamLogin');
-} else if (Cookies.get('unique') && Cookies.get('unique') !== '') {
+} else if (Cookies.get('secret') && Cookies.get('secret') !== '') {
     SendToServer.generic('login');
 }
 

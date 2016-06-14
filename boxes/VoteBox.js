@@ -14,7 +14,7 @@ function VoteBox(data) {
 	Box.call(this);
 	this.id = VoteBox.id;
 
-	this.voteTitle 
+	this.voteTitle
 	this.choices = [];
 
 	if (data.isConsole){
@@ -36,7 +36,7 @@ VoteBox.addRequestListeners = function(socket, stream) {
 	socket.on('request-vote', function(msg){
 		console.log('Request received');
 		//check if the user is logged in
-		var user = stream.users.checkIfUserExists(msg.unique);
+		var user = stream.users.checkCredentials(msg.id, msg.secret);
 		if (user) {
 			stream.requestManager.addRequest(user, 'wants to start a vote. Title: "' + msg.data.voteTitle + '" Choices: ' + msg.data.choices, function(){
 				var boxUnique = stream.addBoxById('VoteBox', msg.data);
@@ -55,19 +55,19 @@ VoteBox.addRequestListeners = function(socket, stream) {
 VoteBox.prototype.addResponseListeners = function(socket, stream) {
 	//Runs the parent addResponseListeners function
 	Box.prototype.addResponseListeners.call(this, socket, stream);
-	
+
 	var self = this;
 	socket.on(self.unique + '-vote', function(msg) {
 		//check if the user is logged in
-		var user = stream.users.checkIfUserExists(msg.unique);
+		var user = stream.users.checkCredentials(msg.id, msg.secret);
 		if (user) {
 			//recreate user object to prevent maximum call stack size error
-			//TODO: Find a more elegant solution
+			//	and to remove the secret from the user objects, to prevent
+			//	it from being sent to everyone, posing a security risk
 			var jsonUser = {
-				unique: user.unique,
 				id: user.id,
-				displayName: user.displayName,
-				realName: user.realName,
+				username: user.username,
+				steamId: user.steamId,
 				isOp: user.isOp
 			}
 			var indexOfChoice = self.getIndexOfChoiceByUnique(msg.data.unique);
@@ -85,7 +85,7 @@ VoteBox.prototype.addResponseListeners = function(socket, stream) {
 	socket.on(self.unique + '-request-voteaddchoice', function(msg){
 		console.log('Request received');
 		//check if the user is logged in
-		var user = stream.users.checkIfUserExists(msg.unique);
+		var user = stream.users.checkCredentials(msg.id, msg.secret);
 		if (user) {
 			var choiceName = msg.data.choiceName;
 			stream.requestManager.addRequest(user, 'wants to add ' + choiceName + ' to the vote', function(){
@@ -146,7 +146,7 @@ VoteBoxChoice.prototype.toggleVote = function(user) {
 	//if the user has not upvoted already
     var hasAlreadyVoted = false;
     for (var i = this.votedBy.length - 1; i >= 0; i--) {
-        if (this.votedBy[i].unique === user.unique) {
+        if (this.votedBy[i].id === user.id) {
             hasAlreadyVoted = true;
             break;
         }
