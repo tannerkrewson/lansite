@@ -255,7 +255,7 @@ Stream.prototype.initializeSteamLogin = function() {
     var LoginSuccessHandler = function(req, res, stream) {
         //this is ran when the user successfully logs into steam
         var user = req.user;
-        
+
         var id;
         var secret;
         var username = req.user.displayName;
@@ -623,7 +623,7 @@ Console.addListeners = function(stream) {
             console.log(loginCode);
             console.log('');
             console.log('Example usage:');
-            console.log('http://localhost:port/login?code=' + loginCode + '&id=IDHERE&name=NAMEHERE');
+            console.log('http://localhost:port/login?code=' + loginCode + '&username=NAMEHERE');
             console.log('');
         }
         else {

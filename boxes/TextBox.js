@@ -61,7 +61,7 @@ TextBox.addRequestListeners = function(socket, stream) {
 				var tempData = {
 					isConsole: false,
 					text: msg.data.message,
-					title: user.displayName + ' says: '
+					title: user.username + ' says: '
 				}
 				var boxUnique = stream.addBoxById('TextBox', tempData);
 				stream.sendBox(boxUnique);
