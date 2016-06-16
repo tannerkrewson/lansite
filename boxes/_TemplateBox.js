@@ -53,11 +53,9 @@ TemplateBox.addRequestListeners = function(socket, stream) {
 			stream.requestManager.addRequest(user, 'has sent a request.', function(){
 				//The code within this block will be ran if the
 				//    request is accepted.
-				console.log('Request accepted');
 			}, function(){
 				//The code within this block will be ran if the
 				//    request is denied.
-				console.log('Request denied');
 			});
 		} else {
 			console.log('Add request failed');

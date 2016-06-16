@@ -41,7 +41,6 @@ VoteBox.addRequestListeners = function(socket, stream) {
 			stream.requestManager.addRequest(user, 'wants to start a vote. Title: "' + msg.data.voteTitle + '" Choices: ' + msg.data.choices, function(){
 				var boxUnique = stream.addBoxById('VoteBox', msg.data);
 				stream.sendBox(boxUnique);
-				console.log('Request accepted');
 			}, function() {
 				//TODO: Notify user their request has been denied, maybe
 			});
@@ -83,7 +82,6 @@ VoteBox.prototype.addResponseListeners = function(socket, stream) {
 		}
 	});
 	socket.on(self.unique + '-request-voteaddchoice', function(msg){
-		console.log('Request received');
 		//check if the user is logged in
 		var user = stream.users.checkCredentials(msg.id, msg.secret);
 		if (user) {
@@ -91,7 +89,6 @@ VoteBox.prototype.addResponseListeners = function(socket, stream) {
 			stream.requestManager.addRequest(user, 'wants to add ' + choiceName + ' to the vote', function(){
 				self.addChoice(msg.data.choiceName);
 				Dispatcher.sendUpdatedBoxToAll(self, stream.users);
-				console.log('Request accepted');
 			}, function() {
 				//TODO: Notify user their request has been denied, maybe
 			});

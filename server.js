@@ -658,7 +658,9 @@ RequestManager.prototype.addRequest = function(userThatMadeRequest, requestStrin
     //if the user is op, accept the request, no questions asked
     if (userThatMadeRequest.isOp) {
         //I bypass adding the request and using the handler here
-        acceptFunction();
+        //  the true tells the function to supress the usual popup
+        //  that users receive when their popup is accepted
+        acceptFunction(true);
         return;
     }
 
@@ -690,7 +692,7 @@ RequestManager.prototype.handleRequest = function(requestUnique, wasAccepted){
         if (wasAccepted){
             request.acceptRequest();
         } else {
-            request.denyFunction()
+            request.denyRequest();
         }
     this.removeRequest(requestUnique);
     };
@@ -755,12 +757,21 @@ function Request(userThatMadeRequest, requestString, boxsUnique, acceptFunction,
     this.boxsUnique = boxsUnique;
 }
 
-Request.prototype.acceptRequest = function(){
+Request.prototype.acceptRequest = function(supressPopup){
     this.acceptFunction(this.user);
+
+    //notify the user that their request was accepted if this
+    //  is not an admin's automatically accepted request
+    if (!supressPopup) {
+        this.user.socket.emit('requestAccepted', this.user.username + ' ' + this.requestText);
+    }
 }
 
 Request.prototype.denyRequest = function(){
     this.denyFunction(this.user);
+
+    //notify the user that their request was denied
+    this.user.socket.emit('requestDenied', this.user.username + ' ' + this.requestText);
 }
 
 

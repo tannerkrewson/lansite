@@ -98,7 +98,6 @@ MatchBox.prototype.addResponseListeners = function(socket, stream) {
 			stream.requestManager.addRequest(jsonUser, 'wants to find players for ' + game, function(){
 				self.addMatch(game, jsonUser, min, max);
 				Dispatcher.sendUpdatedBoxToAll(self, stream.users);
-				console.log('Request accepted');
 			}, function() {
 				//TODO: Notify user their request has been denied, maybe
 			});

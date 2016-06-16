@@ -55,7 +55,6 @@ TextBox.addRequestListeners = function(socket, stream) {
 			stream.requestManager.addRequest(user, 'wants to post: ' + msg.data.message, function(){
 				//The code within this block will be ran if the
 				//    request is accepted.
-				console.log('Request accepted');
 
 				//post the message
 				var tempData = {
@@ -68,7 +67,6 @@ TextBox.addRequestListeners = function(socket, stream) {
 			}, function(){
 				//The code within this block will be ran if the
 				//    request is denied.
-				console.log('Request denied');
 			});
 		} else {
 			console.log('Add request failed');

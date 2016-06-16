@@ -9,6 +9,9 @@
 
 var socket = io();
 
+//this may seem insecure, but the server checks every time to see
+//  if the user is OP. this flag is just for cosmetics, which won't
+//  do anything if the user isn't OP, because the server won't allow it.
 var isThisUserOP = false;
 
 //will contain all the loaded client boxes
@@ -99,7 +102,7 @@ Sidebar.prototype.updateUsers = function() {
         //prepare the string
         var username = user.username;
         if (user.isOp) {
-            username += ' [OP]';
+            username += ' [Admin]';
         }
 
         //append the string to the list
@@ -220,14 +223,34 @@ SendToServer.eventFromIndBox = function(boxUnique, eventName, data){
 
 SendToServer.request = function(requestName, data){
     SendToServer.generic('request-' + requestName, data);
+    Popup.requestSent();
 }
 
 SendToServer.requestFromIndBox = function(boxUnique, requestName, data){
     SendToServer.generic(boxUnique + '-request-' + requestName, data);
+    Popup.requestSent();
 }
 
 SendToServer.areWeOP = function(){
     SendToServer.generic('areWeOP', {});
+}
+
+
+function Popup() {}
+
+Popup.requestSent = function() {
+    //don't annoy the admins with constant popups
+    if (!isThisUserOP) {
+        swal("Request sent!", "Now, wait for the admin to respond.", "success");
+    }
+}
+
+Popup.requestAccepted = function(requestText) {
+    swal("Request Accepted", 'Your request: \n"' + requestText + '"\n was accepted by the admin.', "success");
+}
+
+Popup.requestDenied = function(requestText) {
+    swal("Request Denied", 'Your request: \n "' + requestText + '"\n was denied by the admin.', "error");
 }
 
 
@@ -305,4 +328,13 @@ socket.on('areWeOP', function(msg) {
         //redraw all boxes with the X
         mainStream.redrawAllBoxes();
     }
+});
+
+//shows a popup to inform the user if there request was accepted or denied
+socket.on('requestAccepted', function(msg) {
+    Popup.requestAccepted(msg);
+});
+
+socket.on('requestDenied', function(msg) {
+    Popup.requestDenied(msg);
 });
