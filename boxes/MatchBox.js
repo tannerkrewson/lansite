@@ -95,7 +95,14 @@ MatchBox.prototype.addResponseListeners = function(socket, stream) {
       var game = msg.data.game;
       var min = msg.data.min;
       var max = msg.data.max;
-			stream.requestManager.addRequest(jsonUser, 'wants to find players for ' + game, function(){
+
+			//user is used for addRequest, because the socket is needed to send the
+			//	request notification to the user
+			//jsonUser is used for addMatch because this version of the user object
+			//	will be sent to every client and must lack the socket and secret for
+			//	security
+
+			stream.requestManager.addRequest(user, 'wants to find players for ' + game, function(){
 				self.addMatch(game, jsonUser, min, max);
 				Dispatcher.sendUpdatedBoxToAll(self, stream.users);
 			}, function() {

@@ -33,7 +33,12 @@ MatchBox.prototype.show = function() {
     var button = $('#MatchBox-Popup-submit');
     var self = this;
     var userId = Cookies.get('id');
+
+    //prevent multiple click events from being binded
+    button.off('click');
+    
     button.on('click', function(event) {
+        console.log('click!');
         //get the title from the input box
         var game = popup.find('.matchpopupgame').val();
         var min = popup.find('.matchpopupmin').val();
