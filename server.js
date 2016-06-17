@@ -780,11 +780,6 @@ Request.prototype.denyRequest = function(){
 //  MAIN CODE
 //
 
-
-//this stream will be shown to users not logged in
-var initialStream = new Stream(true);
-initialStream.addBox(new BoxObjects['initialbox']());
-
 var mainStream = new Stream(false);
 mainStream.addBox(new BoxObjects['matchbox']());
 Console.addListeners(mainStream);
@@ -792,9 +787,6 @@ mainStream.initializeSteamLogin();
 
 //handles users coming and going
 io.on('connection', function(socket) {
-    //console.log('Unauthenticated user connected');
-
-    Dispatcher.sendStreamToSocket(initialStream.boxes, socket);
 
     //sent by client if it detects it has a valid token in it's cookies
     socket.on('login', function(msg) {

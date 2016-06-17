@@ -21,12 +21,14 @@
         <!--/.row-->
     </div>
     <!-- /container -->
-    {{>scripts}}
+
+    {{>scripts_base}}
+    {{>scripts_stream}}
+
     {{#each boxes}}
         {{{this.template}}}
     {{/each}}
 
-    </script>
 </body>
 
 </html>
