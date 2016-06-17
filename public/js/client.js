@@ -253,6 +253,19 @@ Popup.requestDenied = function(requestText) {
     swal("Request Denied", 'Your request: \n "' + requestText + '"\n was denied by the admin.', "error");
 }
 
+Popup.lostConnection = function() {
+    swal({
+      title: "Connection Lost",
+      text: "Attempting to reconnect to the server...",
+      showConfirmButton: false,
+      type: "error"
+    });
+}
+
+Popup.close = function() {
+    swal.close();
+}
+
 
 
 //
@@ -337,4 +350,16 @@ socket.on('requestAccepted', function(msg) {
 
 socket.on('requestDenied', function(msg) {
     Popup.requestDenied(msg);
+});
+
+socket.on('requestDenied', function(msg) {
+    Popup.requestDenied(msg);
+});
+
+socket.on('reconnect_attempt', function(msg) {
+    Popup.lostConnection();
+});
+
+socket.on('reconnect', function(msg) {
+    Popup.close();
 });
