@@ -362,4 +362,11 @@ socket.on('reconnect_attempt', function(msg) {
 
 socket.on('reconnect', function(msg) {
     Popup.close();
+
+    //try to login again
+    SendToServer.generic('login');
+});
+
+socket.on('failed', function(msg) {
+    window.location.href = '/';
 });

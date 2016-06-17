@@ -826,6 +826,9 @@ io.on('connection', function(socket) {
 
         } else {
             console.log('User validation unsuccessful');
+
+            //send them back to the homepage to try again
+            socket.emit('failed');
         }
     });
 
