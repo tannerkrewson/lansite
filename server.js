@@ -17,29 +17,31 @@ var app = express();
 var passport = require('passport');
 var SteamStrategy = require('passport-steam').Strategy;
 
-var Box = require('./boxes/shared/Box');
-var Dispatcher = require('./boxes/shared/Dispatcher');
-
-
-//read the config file
 var Config;
+
 try {
-    Config = JSON.parse(require('fs').readFileSync('./config.json', 'utf8'));
+    Config = require('./config.js');
 } catch (e) {
-    console.log('Failed to parse config.json');
-    console.log('Make sure you removed all comments and renamed it to config.json');
+    console.log('Failed to load config.js');
+    console.log('Make sure you copied and rename config.template.js to config.js');
     process.exit(1);
 }
 
-try {
-    //checks to see if the user has changed their Steam API key
-    if (Config.steamAPIKey.length !== 32 || Config.steamAPIKey !== Config.steamAPIKey.replace(/\W/g, '')) {
-        throw err;
-    }
-} catch (e) {
-    console.log('Invalid Steam API key');
-    console.log('Please add your Steam API key to config.json');
-    process.exit(1);
+var Box = require('./boxes/shared/Box');
+var Dispatcher = require('./boxes/shared/Dispatcher');
+
+if (!Config.offlineMode) {
+  try {
+      //checks to see if the user has changed their Steam API key
+      if (Config.steamAPIKey.length !== 32 || Config.steamAPIKey !== Config.steamAPIKey.replace(/\W/g, '')) {
+          throw err;
+      }
+  } catch (e) {
+      console.log('Invalid Steam API key');
+      console.log('Please add your Steam API key to config.js');
+      console.log('or enable offline mode in config.js');
+      process.exit(1);
+  }
 }
 
 

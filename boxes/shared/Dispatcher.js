@@ -3,7 +3,7 @@
 //  By Tanner Krewson
 //
 
-var Config = JSON.parse(require('fs').readFileSync('./config.json', 'utf8'));
+var Config = require('../../config.js');
 
 function Dispatcher() {}
 
