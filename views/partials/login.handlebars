@@ -1,5 +1,35 @@
 <div class="jumbotron">
-  <h1>Welcome to the LAN</h1>
-  <p class="lead">Sign in with your Steam account to get started.</p>
-  <p><a href="/auth/steam"><img src="https://steamcommunity-a.akamaihd.net/public/images/signinthroughsteam/sits_large_noborder.png" alt="Sign in using Steam"></a></p>
+    <h1>Welcome to the LAN</h1>
+    <p class="lead">Sign in with your Steam account to get started.</p>
+    <p>
+        <a href="/auth/steam"><img src="https://steamcommunity-a.akamaihd.net/public/images/signinthroughsteam/sits_large_noborder.png" alt="Sign in using Steam"></a>
+    </p>
+    <br/>
+    <p class="lead">Or, if you were given a code, use it to sign in.</p>
+    <p>
+      <div class="form-inline">
+        <div class="form-group">
+          <label for="loginUsername">Username</label>
+          <input type="text" class="form-control" id="loginUsername" maxlength="24">
+        </div>
+        <div class="form-group">
+          <label for="loginCode">Code</label>
+          <input type="email" class="form-control" id="loginCode" placeholder="ex. ababa" size="8" maxlength="5">
+        </div>
+        <button type="submit" class="btn btn-default" onclick="loginWithCode()">Sign in</button>
+      </div>
+      <script>
+      function loginWithCode() {
+          var username = $('#loginUsername').val().trim();
+          var code = $('#loginCode').val().trim();
+
+          //if code is blank, attempt dev loginCode
+          if (code === '') {
+              window.location.href = '/devlogin?username=' + username;
+          } else {
+              window.location.href = '/login?username=' + username + '&code=' + code;
+          }
+      }
+      </script>
+    </p>
 </div>

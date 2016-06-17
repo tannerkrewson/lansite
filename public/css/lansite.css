@@ -69,3 +69,9 @@ input[type="text"][readonly] {
   position: absolute;
   right: 24px;
 }
+
+.divider{
+    width:5px;
+    height:auto;
+    display:inline-block;
+}
