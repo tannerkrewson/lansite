@@ -271,9 +271,15 @@ Stream.prototype.initializeSteamLogin = function() {
         var username = req.user.displayName;
         var steamId = req.user.id;
 
-        //if the user already exists
+        //if steamId is undefined, the user is from a code or dev login,
+        //  and we always make a new user for them, never reuse,
+        //  so we skip this.
+        var foundUser;
+        if (steamId) {
+            foundUser = stream.users.findUserBySteamId(steamId);
+        }
+
         var userAlreadyExists;
-        var foundUser = stream.users.findUserBySteamId(steamId);
         if (foundUser) {
             userAlreadyExists = stream.users.checkCredentials(foundUser.id, foundUser.secret);
         } else {
