@@ -564,10 +564,10 @@ Console.addListeners = function(stream) {
     var stdin = process.openStdin();
     stdin.addListener("data", function(d) {
         //string of what was entered into the console
-        var line = d.toString().trim().toLowerCase();
+        var line = d.toString().trim();
 
         //automatic add commands
-        if (line.startsWith('add ')) {
+        if (line.toLowerCase().startsWith('add ')) {
             var lineArr = line.split(' ');
             var boxName = lineArr[1].toLowerCase();
             if (boxName in BoxObjects && !BoxObjects[boxName].excludeFromConsole) {
@@ -580,7 +580,7 @@ Console.addListeners = function(stream) {
             }
         }
         //static commands
-        else if (line === "help") {
+        else if (line.toLowerCase() === "help") {
           console.log('');
           console.log('Lansite Command List:');
           console.log('');
@@ -612,8 +612,8 @@ Console.addListeners = function(stream) {
           console.log('');
 
         }
-        else if (line.startsWith("view ")) {
-          var cmd = line.substring(5);
+        else if (line.toLowerCase().startsWith("view ")) {
+          var cmd = line.substring(5).toLowerCase();
           if (cmd === "codes") {
               console.log(stream.users.loginCodes);
           } else if (cmd === "users") {
@@ -626,10 +626,10 @@ Console.addListeners = function(stream) {
             console.log('Invalid view command. Type "help" for a list of commands.');
           }
         }
-        else if (line === "stop") {
+        else if (line.toLowerCase() === "stop") {
             process.exit();
         }
-        else if (line === "generatelogincode") {
+        else if (line.toLowerCase() === "generatelogincode") {
             console.log('');
             console.log('One-time use code:')
             var loginCode = stream.users.generateLoginCode();
