@@ -569,13 +569,14 @@ Console.addListeners = function(stream) {
         //automatic add commands
         if (line.startsWith('add ')) {
             var lineArr = line.split(' ');
-            if (lineArr[1].toLowerCase() in BoxObjects) {
+            var boxName = lineArr[1].toLowerCase();
+            if (boxName in BoxObjects && !BoxObjects[boxName].excludeFromConsole) {
                 var lengthBeforeData = lineArr[0].length + lineArr[1].length + 2;
                 var data = {
                     isConsole: true,
                     line: line.substr(lengthBeforeData, line.length)
                 }
-                stream.addBoxAndSend(new BoxObjects[lineArr[1].toLowerCase()](data));
+                stream.addBoxAndSend(new BoxObjects[boxName](data));
             }
         }
         //static commands
@@ -588,7 +589,9 @@ Console.addListeners = function(stream) {
 
           //add commands
           BoxNames.forEach(function(boxName) {
-            commandList.push('add ' + boxName);
+            if (!BoxObjects[boxName].excludeFromConsole) {
+              commandList.push('add ' + boxName);
+            }
           });
 
           commandList.push('help');

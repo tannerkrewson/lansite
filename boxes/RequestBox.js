@@ -8,6 +8,7 @@ var Dispatcher = require('./shared/Dispatcher');
 
 
 RequestBox.prototype = Object.create(Box.prototype);
+RequestBox.excludeFromConsole = true;
 
 function RequestBox(data) {
 	Box.call(this);
