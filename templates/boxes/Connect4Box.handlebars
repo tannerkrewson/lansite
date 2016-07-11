@@ -1,0 +1,35 @@
+<!--
+
+  Lansite Connect4Box HTML Template
+  By Tanner Krewson
+
+-->
+
+<template id="Connect4Box">
+	<div class="panel panel-primary">
+		<div class="panel-heading">
+		    <h3 class="panel-title">Connect 4 Match Finder</h3>
+		</div>
+		<div class="panel-body">
+			<p class="Connect4Boxempty" style="text-align:center">No games open yet.</p>
+			<div class="matches">
+
+			</div><br/>
+			<button class="btn btn-primary pull-right matchadd" type="button">+Start a Game</button><br/>
+		</div>
+	</div>
+</template>
+
+<template id="Connect4Box-match">
+	<div class="input-group match">
+		<span class="input-group-addon matchstring" style="width: 100%; text-align: left;">
+				error
+	    </span>
+	    <span class="input-group-addon">
+	    	<button class="btn btn-primary matchaccept" type="button">I'll play!</button>
+				<button class="btn btn-danger matchcancel" type="button">Cancel</button>
+	    </span>
+    </div>
+</template>
+
+<script src="js/boxes/Connect4Box.js"></script>

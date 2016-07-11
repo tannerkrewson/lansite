@@ -24,4 +24,8 @@ Config.autoOPFirstUser = true;
 Config.developerMode = false;
 
 
+//Connect 4 URL: If you would prefer to host it yourself, https://github.com/kevers429/connect4
+Config.connectFourUrl = 'http://kevers429.github.io/connect4/';
+
+
 module.exports = Config;

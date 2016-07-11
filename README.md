@@ -11,6 +11,7 @@ Lansite is web app made for smaller LAN parties. It is designed to be a simple, 
 * Attendees can read messages, vote in polls, and find people to play games with
 * Find the Steam profiles of other attendees using the sidebar
 * Request to post messages or votes using the buttons in the sidebar
+* Find an opponent to play [an in-browser Connect 4 game](https://github.com/kevers429/connect4) designed by myself and [kevers429](https://github.com/kevers429/).
 
 ####For the Admins:
 * Easy to install, configure and launch
@@ -40,10 +41,12 @@ Lansite is web app made for smaller LAN parties. It is designed to be a simple, 
   * More console messages
 * Steam API Key (string): Required. Grab one for yourself [here](http://steamcommunity.com/dev/apikey).
 * Auto OP First User (boolean): Make the first user that logs into Lansite the admin
+* Connect 4 Url (string): Should point to a Connect 4 game programmed by myself and [kevers429](https://github.com/kevers429/). You can find the GitHub repo  [here](https://github.com/kevers429/connect4), or try the game out for yourself [here](http://kevers429.github.io/connect4/).
 
 ## Server Console Commands
 * `help`: View a list of commands
 * `stop`: Exit the server. Please note that all data is deleted once the server is closed. Users will have to relogin once restarted.
+* `add connect4box`
 * `add matchbox`
 * `add textbox [title];[text/HTML to display here]`
 * `add votebox [question];[choice1];[choice2];[choice3]...`
@@ -57,6 +60,7 @@ Lansite is web app made for smaller LAN parties. It is designed to be a simple, 
 * VoteBox: Give your attendees a choice in what game to play next, what to eat, etc.
 * TextBox: Give a quick notice to everyone.
 * MatchBox: Allow your attendees to list games they want to play and find players.
+* Connect4Box: A simple match-making system for an online Connect 4 game.
 
 ## Custom Box Creation Instructions
 1. Pick a name. This will be case-sensitive across all files. For this example, we'll call ours `FooBox`.
