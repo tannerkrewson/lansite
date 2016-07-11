@@ -585,6 +585,26 @@ Console.addListeners = function(stream) {
                 stream.addBoxAndSend(new BoxObjects[boxName](data));
             }
         }
+        else if (line.toLowerCase().startsWith('op ')) {
+          var lineArr = line.split(' ');
+          var id = lineArr[1].toLowerCase();
+
+          var userToOp = stream.users.findUser(id);
+          if (userToOp) {
+            userToOp.op();
+            Dispatcher.sendUserListToAll(stream.users);
+          }
+        }
+        else if (line.toLowerCase().startsWith('deop ')) {
+          var lineArr = line.split(' ');
+          var id = lineArr[1].toLowerCase();
+
+          var userToDeop = stream.users.findUser(id);
+          if (userToDeop) {
+            userToDeop.deop();
+            Dispatcher.sendUserListToAll(stream.users);
+          }
+        }
         //static commands
         else if (line.toLowerCase() === "help") {
           console.log('');
@@ -607,6 +627,8 @@ Console.addListeners = function(stream) {
           commandList.push('view requests');
           commandList.push('stop');
           commandList.push('generatelogincode');
+          commandList.push('op [user id here]');
+          commandList.push('deop [user id here]');
 
           commandList.sort();
 
