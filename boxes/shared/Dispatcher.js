@@ -33,7 +33,7 @@ Dispatcher.sendNewBoxToAll = function(box, users) {
 		}
 	});
 	if (Config.developerMode)
-		console.log('Sent new box to all');
+		console.log('Sent new ' + box.id + ' to all');
 }
 
 Dispatcher.sendUpdatedBoxToAll = function(box, users) {
@@ -45,7 +45,7 @@ Dispatcher.sendUpdatedBoxToAll = function(box, users) {
 		}
 	});
 	if (Config.developerMode)
-		console.log('Sent updated box to all');
+		console.log('Sent updated ' + box.id + ' to all');
 }
 
 Dispatcher.attachListenersToUser = function(user, box, stream) {
