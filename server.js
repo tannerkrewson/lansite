@@ -275,7 +275,7 @@ Stream.prototype.initializeSteamLogin = function() {
         var userAlreadyExists;
         var foundUser = stream.users.findUserBySteamId(steamId);
         if (foundUser) {
-            userAlreadyExists = stream.users.checkCredentials(foundUser);
+            userAlreadyExists = stream.users.checkCredentials(foundUser.id, foundUser.secret);
         } else {
             userAlreadyExists = false;
         }
@@ -421,7 +421,7 @@ Users.prototype.findUser = function(id) {
 
 Users.prototype.findUserBySteamId = function(steamId) {
   for (element of this.list) {
-      if (element.streamId === steamId) {
+      if (element.steamId === steamId) {
           return element;
       }
   }
