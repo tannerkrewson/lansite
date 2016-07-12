@@ -86,19 +86,20 @@ Connect4Box.prototype.drawMatches = function() {
 
     for (var i = 0; i < this.matches.length; i++) {
         var matchTemplate = Box.findTemplate('Connect4Box-match');
-        var thisMatch = thisConnect4Box.find('.matches').append(matchTemplate).children(':last');
+        var thisMatchElement = thisConnect4Box.find('.matches').append(matchTemplate).children(':last');
 
-        var matchC4id = this.matches[i].c4id;
-        var matchUnique = this.matches[i].unique;
+        var thisMatch = this.matches[i];
+        var matchC4id = thisMatch.c4id;
+        var matchUnique = thisMatch.unique;
 
         //add an id to our choice
-        thisMatch.attr('id', matchUnique);
+        thisMatchElement.attr('id', matchUnique);
 
         //update the text for this match
-        this.updateMatchString(this.matches[i]);
+        this.updateMatchString(thisMatch);
 
-        var acceptButton = thisMatch.find('.matchaccept');
-        var cancelButton = thisMatch.find('.matchcancel');
+        var acceptButton = thisMatchElement.find('.matchaccept');
+        var cancelButton = thisMatchElement.find('.matchcancel');
 
         //precautionary
         acceptButton.hide();
@@ -106,7 +107,7 @@ Connect4Box.prototype.drawMatches = function() {
 
         //determine which button to show
         // if this user is in the match
-        if (this.isUserHost(userId, this.matches[i])) {
+        if (this.isUserHost(userId, thisMatch)) {
             //display the cancel button, hide the accept button
             acceptButton.hide();
             cancelButton.show();
@@ -129,7 +130,7 @@ Connect4Box.prototype.drawMatches = function() {
                     });
 
                     //join the connect 4 match
-                    var url = self.url + '?join=' + matchC4id;
+                    var url = self.url + '?join=' + matchC4id + '&name=' + thisMatch.host.username;
                     var win = window.open(url, '_blank');
                     win.focus();
                 });
