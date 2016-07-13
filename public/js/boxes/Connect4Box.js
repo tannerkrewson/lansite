@@ -73,7 +73,7 @@ Connect4Box.prototype.drawMatches = function() {
 
     var self = this;
     var thisConnect4Box = $('#' + this.unique);
-    var userId = Cookies.get('id');
+    var userId = parseInt(Cookies.get('id'));
 
     //If there are no matches
     if (this.matches.length === 0){
@@ -129,8 +129,20 @@ Connect4Box.prototype.drawMatches = function() {
                         'matchUnique': mu
                     });
 
+                    var usernameArg = '';
+
+                    //hacky way of getting the username of ourselves
+                    for (var i = 0; i < mainSidebar.users.length; i++) {
+                      //if our user id is equal to the one in the list
+                      if (userId === mainSidebar.users[i].id) {
+                        //get the username from that user
+                        usernameArg = '&name=' + mainSidebar.users[i].username;
+                        break;
+                      }
+                    }
+
                     //join the connect 4 match
-                    var url = self.url + '?join=' + matchC4id + '&name=' + thisMatch.host.username;
+                    var url = self.url + '?join=' + matchC4id + usernameArg;
                     var win = window.open(url, '_blank');
                     win.focus();
                 });
@@ -145,7 +157,7 @@ Connect4Box.prototype.updateMatchString = function(match) {
 }
 
 Connect4Box.prototype.isUserHost = function(userId, match) {
-    if (match.host.id === parseInt(userId)) {
+    if (match.host.id === userId) {
         return true;
     }
     return false;
