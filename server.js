@@ -562,6 +562,18 @@ User.prototype.deop = function() {
     this.isOp = false;
 }
 
+User.prototype.toStrippedJson = function() {
+  //recreate user object to prevent maximum call stack size error
+  //	and to remove the secret from the user objects, to prevent
+  //	it from being sent to everyone, posing a security risk
+  return {
+    id: this.id,
+    username: this.username,
+    steamId: this.steamId,
+    isOp: this.isOp
+  }
+}
+
 
 
 function Console() {}

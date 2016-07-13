@@ -16,6 +16,8 @@ function TemplateBox(data) {
 	Box.call(this);
 	this.id = TemplateBox.id;
 
+	//isConsole will be true if this box is being created from
+	//	the 'add templatebox' console command
 	if (data.isConsole){
 		this.something = data.line.split(';');
 		//data.line will be whatever is after the command in the console.
@@ -36,31 +38,59 @@ TemplateBox.prototype.addResponseListeners = function(socket, stream) {
 	Box.prototype.addResponseListeners.call(this, socket, stream);
 
 	var self = this;
-	socket.on(self.unique + '-test', function(msg) {
 
-		//DO SOMETHING
+	//ran when the client sends the event 'test' to this individual box
+	this.addEventListener('test', socket, stream, function(user, data){
+
+		// Write code here to do something with user and data.
+		// Note that the user object has already been authenticated and approved.
+
+		//if you have added code that makes changes to what the box displays,
+		//	run the following to send the updates to all clients:
+		Dispatcher.sendUpdatedBoxToAll(self, stream.users);
+	});
+
+	//ran when the client sends the request 'requestTest' to this individual box
+	this.addRequestListener('requestTest', socket, stream, function(user, data){
+
+		// Write code here to do something with user and data.
+		// Note that the user object has already been authenticated and approved.
+
+		stream.requestManager.addRequest(user, 'has sent a request.', function(){
+			//The code within this block will be ran if the
+			//    request is accepted.
+		}, function(){
+			//The code within this block will be ran if the
+			//    request is denied.
+		});
+
+		//if you have added code that makes changes to what the box displays,
+		//	run the following to send the updates to all clients:
 		Dispatcher.sendUpdatedBoxToAll(self, stream.users);
 	});
 }
 
 TemplateBox.addRequestListeners = function(socket, stream) {
-	socket.on('request-requestname', function(msg){
-		console.log('Request received');
-		console.log(msg);
-		//check if the user is logged in
-		var user = stream.users.checkCredentials(msg.id, msg.secret);
-		if (user) {
-			stream.requestManager.addRequest(user, 'has sent a request.', function(){
-				//The code within this block will be ran if the
-				//    request is accepted.
-			}, function(){
-				//The code within this block will be ran if the
-				//    request is denied.
-			});
-		} else {
-			console.log('Add request failed');
-		}
-	})
+	//ran when the client sends the request 'addTemplateBox', usually froma sidebar button
+	Box.addStaticRequestListener('addTemplateBox', socket, stream, function(user, data){
+
+		//Write code here to do something with user who sent the data and
+		//	the data itself.
+		//Note that the user object has already been authenticated and approved.
+
+		stream.requestManager.addRequest(user, 'wants to create a TemplateBox', function(){
+			//The code within this block will be ran if the
+			//    request is accepted.
+
+			//Below is an example of code that creates a new instance of a TemplateBox
+			//	in the stream, and sends it to everyone
+			var boxUnique = stream.addBoxById('TemplateBox', data);
+			stream.sendBox(boxUnique);
+		}, function(){
+			//The code within this block will be ran if the
+			//    request is denied.
+		});
+	});
 }
 
 

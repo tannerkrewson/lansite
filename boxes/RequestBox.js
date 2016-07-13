@@ -15,18 +15,7 @@ function RequestBox(data) {
 	this.id = RequestBox.id;
 	this.adminStreamOnly = true;
 
-	if (data.isConsole){
-		//this.something = data.line.split(';');
-		//data.line will be whatever is after the command in the console.
-		//Example of command entered into console:
-		//
-		//	add RequestBox foobarbaz zavraboof
-		//                  ^----------------->
-	} else {
-		//This is if the box was not added via console, for example
-		//    if it was added from a request acceptance.
-		this.text = data.text;
-	}
+	this.text = data.text
 }
 
 RequestBox.id = "RequestBox";
@@ -35,22 +24,19 @@ RequestBox.prototype.addAdminResponseListeners = function(socket, reqMan) {
 	var self = this;
 	var adminStream = reqMan.adminStream;
 
-	socket.on(self.unique + '-handle', function(msg) {
-		//if the user exists in the admin stream
-		if (adminStream.users.checkCredentials(msg.id, msg.secret)) {
-			//grab the corresponding request that is stored
-			var reqUnique = msg.data.unique;
-			var reqIndex = reqMan.getIndexByUnique(reqUnique);
+	this.addEventListener('handle', socket, adminStream, function(user, data) {
+		//grab the corresponding request that is stored
+		var reqUnique = data.unique;
+		var reqIndex = reqMan.getIndexByUnique(reqUnique);
 
-			//if the request exists
-			if (reqIndex !== -1) {
-				//check if admin accepted or denied request
-				var wasAccepted = msg.data.wasAccepted;
+		//if the request exists
+		if (reqIndex !== -1) {
+			//check if admin accepted or denied request
+			var wasAccepted = data.wasAccepted;
 
-				//send it on over
-				reqMan.handleRequest(reqUnique, wasAccepted);
-			};
-		}
+			//send it on over
+			reqMan.handleRequest(reqUnique, wasAccepted);
+		};
 	});
 }
 

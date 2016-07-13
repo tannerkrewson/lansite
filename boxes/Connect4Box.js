@@ -28,66 +28,37 @@ Connect4Box.prototype.addResponseListeners = function(socket, stream) {
 	Box.prototype.addResponseListeners.call(this, socket, stream);
 
 	var self = this;
-	socket.on(self.unique + '-accept', function(msg){
-		//check if the user is logged in
-		var user = stream.users.checkCredentials(msg.id, msg.secret);
-		if (user) {
-			//recreate user object to prevent maximum call stack size error
-			//	and to remove the secret from the user objects, to prevent
-			//	it from being sent to everyone, posing a security risk
-			var jsonUser = {
-				id: user.id,
-				username: user.username,
-				steamId: user.steamId,
-				isOp: user.isOp
-			}
-			var match = self.getMatchByUnique(msg.data.matchUnique);
 
-			//if the match exists
-			if (match !== null){
-				//remove the match, because connect4 is only 2 players
-				self.removeMatch(match);
-			}
-			Dispatcher.sendUpdatedBoxToAll(self, stream.users);
-		} else {
-			console.log("C4 I'll play failed");
+	//sent when a client click the I'll play button of another player's match
+	this.addEventListener('accept', socket, stream, function(user, data){
+		var match = self.getMatchByUnique(data.matchUnique);
+
+		//if the match exists
+		if (match !== null){
+			//remove the match, because connect4 is only 2 players
+			self.removeMatch(match);
 		}
-	})
-	socket.on(self.unique + '-cancel', function(msg){
-		//check if the user is logged in
-		var user = stream.users.checkCredentials(msg.id, msg.secret);
-		if (user) {
-			var match = self.getMatchByUnique(msg.data.matchUnique);
+		Dispatcher.sendUpdatedBoxToAll(self, stream.users);
+	});
 
-			//if the match exists and the user is the host
-			if (match !== null && parseInt(msg.id) === match.host.id){
-				//delete the whole match
-				self.removeMatch(match);
-				Dispatcher.sendUpdatedBoxToAll(self, stream.users);
-			}
-		} else {
-			console.log("C4 Cancel failed");
-		}
-	})
-	socket.on(self.unique + '-newmatch', function(msg){
-		//check if the user is logged in
-		var user = stream.users.checkCredentials(msg.id, msg.secret);
-		if (user) {
-			//recreate user object to prevent maximum call stack size error
-			//	and to remove the secret from the user objects, to prevent
-			//	it from being sent to everyone, posing a security risk
-			var jsonUser = {
-				id: user.id,
-				username: user.username,
-				steamId: user.steamId,
-				isOp: user.isOp
-			}
+	//sent when the client who made a match clicks the cancel button
+	this.addEventListener('cancel', socket, stream, function(user, data) {
+		var match = self.getMatchByUnique(data.matchUnique);
 
-			var c4id = msg.data.c4id;
-
-			self.addMatch(c4id, jsonUser);
+		//if the match exists and the user is the host
+		if (match !== null && parseInt(user.id) === match.host.id){
+			//delete the whole match
+			self.removeMatch(match);
 			Dispatcher.sendUpdatedBoxToAll(self, stream.users);
 		}
+	});
+
+	//sent when a client clicks the Start a new Game button
+	this.addEventListener('newmatch', socket, stream, function(user, data) {
+		var c4id = data.c4id;
+
+		self.addMatch(c4id, user.toStrippedJson());
+		Dispatcher.sendUpdatedBoxToAll(self, stream.users)
 	});
 }
 

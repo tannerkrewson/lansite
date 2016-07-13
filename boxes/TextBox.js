@@ -47,31 +47,19 @@ TextBox.prototype.addResponseListeners = function(socket, stream) {
 }
 
 TextBox.addRequestListeners = function(socket, stream) {
-	socket.on('request-postMessage', function(msg){
-		console.log('Request received');
-		//check if the user is logged in
-		var user = stream.users.checkCredentials(msg.id, msg.secret);
-		if (user) {
-			stream.requestManager.addRequest(user, 'wants to post: ' + msg.data.message, function(){
-				//The code within this block will be ran if the
-				//    request is accepted.
-
-				//post the message
-				var tempData = {
-					isConsole: false,
-					text: msg.data.message,
-					title: user.username + ' says: '
-				}
-				var boxUnique = stream.addBoxById('TextBox', tempData);
-				stream.sendBox(boxUnique);
-			}, function(){
-				//The code within this block will be ran if the
-				//    request is denied.
-			});
-		} else {
-			console.log('Add request failed');
-		}
-	})
+  //sent when the client uses the 'Post a Message' button on the sidebar
+	Box.addStaticRequestListener('postMessage', socket, stream, function(user, data) {
+    stream.requestManager.addRequest(user, 'wants to post: ' + data.message, function(){
+      //post the message
+      var tempData = {
+        isConsole: false,
+        text: data.message,
+        title: user.username + ' says: '
+      }
+      var boxUnique = stream.addBoxById('TextBox', tempData);
+      stream.sendBox(boxUnique);
+    }, function(){});
+	});
 }
 
 

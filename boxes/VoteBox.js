@@ -33,22 +33,16 @@ VoteBox.id = "VoteBox";
 
 
 VoteBox.addRequestListeners = function(socket, stream) {
-	socket.on('request-vote', function(msg){
-		console.log('Request received');
-		//check if the user is logged in
-		var user = stream.users.checkCredentials(msg.id, msg.secret);
-		if (user) {
-			stream.requestManager.addRequest(user, 'wants to start a vote. Title: "' + msg.data.voteTitle + '" Choices: ' + msg.data.choices, function(){
-				var boxUnique = stream.addBoxById('VoteBox', msg.data);
-				stream.sendBox(boxUnique);
-			}, function() {
-				//TODO: Notify user their request has been denied, maybe
-			});
-			//Dispatcher.sendUpdatedBoxToAll(self, stream.users);
-		} else {
-			console.log('Add request failed');
-		}
-	})
+
+	//sent when the client uses the 'Start a Vote' button on the sidebar
+	Box.addStaticRequestListener('vote', socket, stream, function(user, data) {
+		var requestMessage = 'wants to start a vote. Title: "' + data.voteTitle + '" Choices: ' + data.choices;
+		stream.requestManager.addRequest(user, requestMessage, function() {
+			var boxUnique = stream.addBoxById('VoteBox', data);
+			stream.sendBox(boxUnique);
+		}, function() {});
+	});
+
 }
 
 VoteBox.prototype.addResponseListeners = function(socket, stream) {
@@ -56,46 +50,27 @@ VoteBox.prototype.addResponseListeners = function(socket, stream) {
 	Box.prototype.addResponseListeners.call(this, socket, stream);
 
 	var self = this;
-	socket.on(self.unique + '-vote', function(msg) {
-		//check if the user is logged in
-		var user = stream.users.checkCredentials(msg.id, msg.secret);
-		if (user) {
-			//recreate user object to prevent maximum call stack size error
-			//	and to remove the secret from the user objects, to prevent
-			//	it from being sent to everyone, posing a security risk
-			var jsonUser = {
-				id: user.id,
-				username: user.username,
-				steamId: user.steamId,
-				isOp: user.isOp
-			}
-			var indexOfChoice = self.getIndexOfChoiceByUnique(msg.data.unique);
-			//if the choice exists
-			if (indexOfChoice !== -1) {
-				self.choices[indexOfChoice].toggleVote(jsonUser);
-				//sort the array for the client
-				self.sortByVotes();
-			}
-			Dispatcher.sendUpdatedBoxToAll(self, stream.users);
-		} else {
-			console.log('Vote failed');
+
+	//sent when a client checks or unchecks a choice in this vote box
+	this.addEventListener('vote', socket, stream, function(user, data){
+		var indexOfChoice = self.getIndexOfChoiceByUnique(data.unique);
+		//if the choice exists
+		if (indexOfChoice !== -1) {
+			self.choices[indexOfChoice].toggleVote(user.toStrippedJson());
+			//sort the array for the client
+			self.sortByVotes();
 		}
+		Dispatcher.sendUpdatedBoxToAll(self, stream.users);
 	});
-	socket.on(self.unique + '-request-voteaddchoice', function(msg){
-		//check if the user is logged in
-		var user = stream.users.checkCredentials(msg.id, msg.secret);
-		if (user) {
-			var choiceName = msg.data.choiceName;
-			stream.requestManager.addRequest(user, 'wants to add ' + choiceName + ' to the vote', function(){
-				self.addChoice(msg.data.choiceName);
-				Dispatcher.sendUpdatedBoxToAll(self, stream.users);
-			}, function() {
-				//TODO: Notify user their request has been denied, maybe
-			});
-		} else {
-			console.log('Add request failed');
-		}
-	})
+
+	//sent when client adds a custom choice in the bottom box in this vote box
+	this.addRequestListener('voteaddchoice', socket, stream, function(user, data) {
+		var choiceName = data.choiceName;
+		stream.requestManager.addRequest(user, 'wants to add ' + choiceName + ' to the vote', function() {
+			self.addChoice(data.choiceName);
+			Dispatcher.sendUpdatedBoxToAll(self, stream.users);
+		}, function() {});
+	});
 }
 
 VoteBox.prototype.addChoices = function(choicesArray){

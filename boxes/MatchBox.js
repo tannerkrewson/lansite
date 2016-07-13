@@ -25,93 +25,60 @@ MatchBox.prototype.addResponseListeners = function(socket, stream) {
 	Box.prototype.addResponseListeners.call(this, socket, stream);
 
 	var self = this;
-	socket.on(self.unique + '-accept', function(msg){
-		//check if the user is logged in
-		var user = stream.users.checkCredentials(msg.id, msg.secret);
-		if (user) {
-			//recreate user object to prevent maximum call stack size error
-			//	and to remove the secret from the user objects, to prevent
-			//	it from being sent to everyone, posing a security risk
-			var jsonUser = {
-				id: user.id,
-				username: user.username,
-				steamId: user.steamId,
-				isOp: user.isOp
-			}
-			var match = self.getMatchByUnique(msg.data.matchUnique);
 
-			//if the user is not already in the match, this will be false
-			var checkUser = match.checkIfUserInMatch(jsonUser.id);
+	//sent when a client clicks the I'll Play button
+	this.addEventListener('accept', socket, stream, function(user, data) {
+		var match = self.getMatchByUnique(data.matchUnique);
 
-			//if the match exists and the user was not found in the match
-			if (match !== null && !checkUser){
-				//add them to this match
-				match.addUser(jsonUser);
+		//if the user is not already in the match, this will be false
+		var checkUser = match.checkIfUserInMatch(user.id);
+
+		//if the match exists and the user was not found in the match
+		if (match !== null && !checkUser){
+			//add them to this match
+			match.addUser(user.toStrippedJson());
+		}
+		Dispatcher.sendUpdatedBoxToAll(self, stream.users);
+	});
+
+	//sent when a client clicks the dropout button of a match
+	this.addEventListener('cancel', socket, stream, function(user, data) {
+		var match = self.getMatchByUnique(data.matchUnique);
+
+		//if the user is already in the match, this will not be null
+		var userToRemove = match.checkIfUserInMatch(user.id);
+
+		//if the match exists and the user was found in the match
+		if (match !== null && userToRemove !== null){
+			//check to see if the host is droping out
+			if (userToRemove.id === match.host.id){
+				//delete the whole match
+				self.removeMatch(match);
+			} else {
+				//remove them from this match
+				match.removeUser(userToRemove);
 			}
+		}
+		Dispatcher.sendUpdatedBoxToAll(self, stream.users);
+	});
+
+	//sent when a client clicks the Find Players button
+	this.addRequestListener('newmatch', socket, stream, function(user, data) {
+		var game = data.game;
+		var min = data.min;
+		var max = data.max;
+
+		//user is used for addRequest, because the socket is needed to send the
+		//	request notification to the user
+		//strippedJson of User is used for addMatch because this version of the user object
+		//	will be sent to every client and must lack the socket to prevent an
+		//	error, and lack the secret so that it is not sent to everyone
+
+		stream.requestManager.addRequest(user, 'wants to find players for ' + game, function(){
+			self.addMatch(game, user.toStrippedJson(), min, max);
 			Dispatcher.sendUpdatedBoxToAll(self, stream.users);
-		} else {
-			console.log("I'll play failed");
-		}
-	})
-	socket.on(self.unique + '-cancel', function(msg){
-		//check if the user is logged in
-		var user = stream.users.checkCredentials(msg.id, msg.secret);
-		if (user) {
-			var match = self.getMatchByUnique(msg.data.matchUnique);
-
-			//if the user is already in the match, this will not be null
-			var userToRemove = match.checkIfUserInMatch(user.id);
-
-			//if the match exists and the user was found in the match
-			if (match !== null && userToRemove !== null){
-				//check to see if the host is droping out
-				if (userToRemove.id === match.host.id){
-					//delete the whole match
-					self.removeMatch(match);
-				} else {
-					//remove them from this match
-					match.removeUser(userToRemove);
-				}
-			}
-			Dispatcher.sendUpdatedBoxToAll(self, stream.users);
-		} else {
-			console.log("Dropout failed");
-		}
-	})
-	socket.on(self.unique + '-request-newmatch', function(msg){
-		console.log('Request received');
-		//check if the user is logged in
-		var user = stream.users.checkCredentials(msg.id, msg.secret);
-		if (user) {
-			//recreate user object to prevent maximum call stack size error
-			//	and to remove the secret from the user objects, to prevent
-			//	it from being sent to everyone, posing a security risk
-			var jsonUser = {
-				id: user.id,
-				username: user.username,
-				steamId: user.steamId,
-				isOp: user.isOp
-			}
-      var game = msg.data.game;
-      var min = msg.data.min;
-      var max = msg.data.max;
-
-			//user is used for addRequest, because the socket is needed to send the
-			//	request notification to the user
-			//jsonUser is used for addMatch because this version of the user object
-			//	will be sent to every client and must lack the socket and secret for
-			//	security
-
-			stream.requestManager.addRequest(user, 'wants to find players for ' + game, function(){
-				self.addMatch(game, jsonUser, min, max);
-				Dispatcher.sendUpdatedBoxToAll(self, stream.users);
-			}, function() {
-				//TODO: Notify user their request has been denied, maybe
-			});
-		} else {
-			console.log('Add request failed');
-		}
-	})
+		}, function() {});
+	});
 }
 
 MatchBox.prototype.addMatch = function(game, host, min, max){
