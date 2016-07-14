@@ -105,10 +105,18 @@ Sidebar.prototype.updateUsers = function() {
             username += ' [Admin]';
         }
 
+        //prevent non-steam users from having a broken url
+        var steamUrl = '';
+        if (user.steamId) {
+          steamUrl = 'http://steamcommunity.com/profiles/' + user.steamId;
+        } else {
+          steamUrl = 'javascript:swal("' + user.username + ' does not have a Steam profile.", "", "warning");';
+        }
+
         //append the string to the list
         $('#sidebar ul').append(
             $('<li>').append(
-                $('<a>').attr('href', 'http://steamcommunity.com/profiles/' + user.steamId).append(
+                $('<a>').attr('href', steamUrl).attr('target', '_blank').append(
                     $('<span>').attr('class', 'tab').append(username)
                 )));
     });
