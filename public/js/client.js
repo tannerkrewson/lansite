@@ -99,6 +99,9 @@ Sidebar.prototype.replaceUsers = function(listOfUsers) {
 Sidebar.prototype.updateUsers = function() {
     this.clearUsers();
     this.users.forEach(function(user) {
+
+        /* Create the info popup for this user */
+
         //prepare the string
         var username = user.username;
         if (user.isOp) {
@@ -106,21 +109,46 @@ Sidebar.prototype.updateUsers = function() {
         }
 
         //prevent non-steam users from having a broken url
-        var steamUrl = '';
+        var popupMessage = '';
         if (user.steamInfo.id) {
-          steamUrl = 'http://steamcommunity.com/profiles/' + user.steamInfo.id;
-        } else {
-          steamUrl = 'javascript:swal("' + user.username + ' does not have a Steam profile.", "", "warning");';
+          var steamUrl = 'http://steamcommunity.com/profiles/' + user.steamInfo.id;
+          popupMessage += 'Click <a href="' + steamUrl + '" target="_blank">here</a> to go to their Steam profile.<br>';
+        }
+        //popupMessage += '<br>Send them a private message:<br>';
+
+        user.showInfoPopup = function() {
+          swal({
+              title: user.username + (user.isOp ? ' [Admin]' : ''),
+              text: popupMessage,
+              imageUrl: user.steamInfo.avatar,
+              //type: "input",
+              showCancelButton: true,
+              closeOnConfirm: false,
+              html: true
+          }, function(inputValue) {
+              if (inputValue === false) return false;
+              if (inputValue === "") {
+                  swal.showInputError("Your message can't be blank!");
+                  return false
+              }
+              if (inputValue.length > 255) {
+                  swal.showInputError("Your message is too long!");
+                  return false
+              }
+              swal("Message sent to " + user.username, "You wrote: " + inputValue, "success");
+          });
         }
 
-        //append the string to the list
+        /* Add the user to the Sidebar */
         $('#sidebar ul').append(
             $('<li>').append(
-                $('<a>').attr('href', steamUrl).attr('target', '_blank').append(
+                $('<a>').click(user.showInfoPopup).append(
                     $('<span>').attr('class', 'tab').append(username)
                 )));
     });
 };
+
+Sidebar
 
 Sidebar.prototype.clearUsers = function() {
     $('#sidebar ul').empty();
