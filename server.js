@@ -169,6 +169,8 @@ function Stream(isBasic) {
     if (!isBasic){
         this.requestManager = new RequestManager();
     }
+
+    this.usersCanPm = Config.privateMessaging;
 }
 
 Stream.prototype.addBoxAndSend = function(boxToAdd) {
@@ -374,6 +376,49 @@ Stream.prototype.initializeSteamLogin = function() {
     });
 
 };
+
+Stream.prototype.initializePrivateMessaging = function(socket) {
+  var self = this;
+  Box.addStaticEventListener('message', socket, this, function(user, data) {
+    //check if pm has been enabled or disabled from the console
+    if (self.usersCanPm) {
+      self.sendMessage(data.message, data.userToReceiveMessage.id, user.id, self);
+    }
+  });
+}
+
+Stream.prototype.sendMessage = function(message, idOfUserToReceiveMessage, idOfUserWhoSentMessage) {
+  var userToReceiveMessage = this.users.findUser(idOfUserToReceiveMessage);
+  var userWhoSentMessage = this.users.findUser(idOfUserWhoSentMessage);
+  if (userToReceiveMessage && userToReceiveMessage.canReceivePMs) {
+    userToReceiveMessage.socket.emit('message', {
+      userWhoSentMessage: userWhoSentMessage.toStrippedJson(),
+      message: message
+    })
+  }
+}
+
+Stream.prototype.enablePrivateMessaging = function() {
+  this.users.list.forEach(function(user) {
+    user.canReceivePMs = true;
+  })
+
+  this.usersCanPm = true;
+
+  //clients use the user list to determine if they can pm another user
+  Dispatcher.sendUserListToAll(this.users);
+}
+
+Stream.prototype.disablePrivateMessaging = function() {
+  this.users.list.forEach(function(user) {
+    user.canReceivePMs = false;
+  })
+
+  this.usersCanPm = false;
+
+  //clients use the user list to determine if they can pm another user
+  Dispatcher.sendUserListToAll(this.users);
+}
 
 
 
@@ -681,6 +726,13 @@ Console.addListeners = function(stream) {
             console.log('http://localhost:port/login?code=' + loginCode + '&username=NAMEHERE');
             console.log('');
         }
+        else if (line.toLowerCase().startsWith('pm ')) {
+            if (line.toLowerCase() === 'pm on') {
+              stream.enablePrivateMessaging();
+            } else if (line.toLowerCase() === 'pm off'){
+              stream.disablePrivateMessaging();
+            }
+        }
         else {
           console.log('');
           console.log('Invalid command. Type "help" for a list of commands.');
@@ -822,27 +874,6 @@ Request.prototype.denyRequest = function(){
 }
 
 
-function MessagingSystem() {}
-
-MessagingSystem.initialize = function(socket, stream) {
-  var self = this;
-  Box.addStaticEventListener('message', socket, stream, function(user, data) {
-    self.sendMessage(data.message, data.userToReceiveMessage.id, user.id, stream);
-  });
-}
-
-MessagingSystem.sendMessage = function(message, idOfUserToReceiveMessage, idOfUserWhoSentMessage, stream) {
-  var userToReceiveMessage = stream.users.findUser(idOfUserToReceiveMessage);
-  var userWhoSentMessage = stream.users.findUser(idOfUserWhoSentMessage);
-  if (userToReceiveMessage && userToReceiveMessage.canReceivePMs) {
-    userToReceiveMessage.socket.emit('message', {
-      userWhoSentMessage: userWhoSentMessage.toStrippedJson(),
-      message: message
-    })
-  }
-}
-
-
 
 //
 //  MAIN CODE
@@ -853,6 +884,12 @@ mainStream.addBox(new BoxObjects['matchbox']());
 mainStream.addBox(new BoxObjects['connect4box']());
 Console.addListeners(mainStream);
 mainStream.initializeSteamLogin();
+
+if (Config.privateMessaging) {
+  mainStream.enablePrivateMessaging();
+} else {
+  mainStream.disablePrivateMessaging();
+}
 
 //handles users coming and going
 io.on('connection', function(socket) {
@@ -869,9 +906,7 @@ io.on('connection', function(socket) {
                 user.op();
             }
 
-            if (Config.privateMessaging) {
-              MessagingSystem.initialize(socket, mainStream);
-            }
+            mainStream.initializePrivateMessaging(socket);
 
             mainStream.prepNewUser(user.id);
 

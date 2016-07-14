@@ -53,6 +53,7 @@ Lansite is web app made for smaller LAN parties. It is designed to be a simple, 
 * `generatelogincode`: Generates a code that can be used by users to login. This maybe helpful if, for example, someone does not have a Steam account, or your LAN does not have internet.
 * `op [user id here]`: Give admin rights to this user. A user's id can be found with the `view users` command.
 * `deop [user id here]`: Remove admin privileges from this user.
+* `pm [on/off]`: Enable or disable the private messaging system on the fly.
 * `view boxes`: View all of the boxes in the stream.
 * `view codes`: View all of the active login codes generated using the `generatelogincode` command. Codes are one-time use, and will be removed from this list after usage.
 * `view requests`: View all of open requests. These are also displayed in the admin stream.
