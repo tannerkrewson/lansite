@@ -184,10 +184,23 @@ MatchBox.prototype.updateMatchCounter = function(match) {
             //prepare the string
             var username = user.username;
 
+            //get the user's popup function from the sidebar
+            //  I did it like this because the sidebar hasn't loaded
+            //  when this code runs, so I wait until the user clicks
+            //  the button to run it
+            var popupUserInfo = function() {
+              for (var i = 0; i < mainSidebar.users.length; i++) {
+                if (user.id === mainSidebar.users[i].id) {
+                  mainSidebar.users[i].showInfoPopup();
+                  break;
+                }
+              }
+            }
+
             //append the string to the list
             thisDropdown.append(
                 $('<li>').append(
-                    $('<a>').attr('href', 'http://steamcommunity.com/profiles/' + user.steamInfo.id).append(
+                    $('<a>').click(popupUserInfo).append(
                         $('<span>').attr('class', 'tab').append(username)
                     )));
         });
