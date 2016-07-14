@@ -509,6 +509,14 @@ Users.prototype.getAllUsers = function() {
   return this.list;
 }
 
+Users.prototype.getAllUsersStripped = function() {
+  var tempList = [];
+  this.list.forEach(function(user) {
+    tempList.push(user.toStrippedJson());
+  });
+  return tempList;
+}
+
 Users.prototype.getOnlineUsers = function() {
     var result = [];
     this.list.forEach(function(user) {
@@ -704,7 +712,7 @@ Console.addListeners = function(stream) {
           if (cmd === "codes") {
               console.log(stream.users.loginCodes);
           } else if (cmd === "users") {
-              console.log(stream.users.getAllUsers());
+              console.log(stream.users.getAllUsersStripped());
           } else if (cmd === "boxes") {
               console.log(stream.listAllBoxes());
           } else if (cmd === "requests") {
