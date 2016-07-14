@@ -427,7 +427,7 @@ Users.prototype.findUser = function(id) {
 
 Users.prototype.findUserBySteamId = function(steamId) {
   for (element of this.list) {
-      if (element.steamInfo.id === steamId) {
+      if (element.steamInfo && element.steamInfo.id === steamId) {
           return element;
       }
   }
