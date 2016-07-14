@@ -102,30 +102,31 @@ Sidebar.prototype.updateUsers = function() {
 
         /* Create the info popup for this user */
 
-        //prepare the string
         var username = user.username;
         if (user.isOp) {
             username += ' [Admin]';
         }
 
-        //prevent non-steam users from having a broken url
-        var popupMessage = '';
-        if (user.steamInfo.id) {
-          var steamUrl = 'http://steamcommunity.com/profiles/' + user.steamInfo.id;
-          popupMessage += 'Click <a href="' + steamUrl + '" target="_blank">here</a> to go to their Steam profile.<br>';
-        }
-        //popupMessage += '<br>Send them a private message:<br>';
-
         user.showInfoPopup = function() {
-          swal({
-              title: user.username + (user.isOp ? ' [Admin]' : ''),
-              text: popupMessage,
-              imageUrl: user.steamInfo.avatar,
+          var swalJson = {
+              title: username,
               //type: "input",
               showCancelButton: true,
               closeOnConfirm: false,
               html: true
-          }, function(inputValue) {
+          };
+
+          if (user.steamInfo) {
+            swalJson.imageUrl = user.steamInfo.avatar;
+            swalJson.text = 'Click <a href="';
+            swalJson.text += 'http://steamcommunity.com/profiles/' + user.steamInfo.id;
+            swalJson.text += '" target="_blank">here</a> to go to their Steam profile.<br>';
+          }
+
+          //if pm's are enabled, and this user is not us
+          //swalJson.text += '<br>Send them a private message:<br>';
+
+          var swalOnSubmit = function(inputValue) {
               if (inputValue === false) return false;
               if (inputValue === "") {
                   swal.showInputError("Your message can't be blank!");
@@ -136,7 +137,10 @@ Sidebar.prototype.updateUsers = function() {
                   return false
               }
               swal("Message sent to " + user.username, "You wrote: " + inputValue, "success");
-          });
+          };
+
+          //show the popup
+          swal(swalJson, swalOnSubmit);
         }
 
         /* Add the user to the Sidebar */

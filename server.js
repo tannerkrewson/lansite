@@ -269,30 +269,28 @@ Stream.prototype.initializeSteamLogin = function() {
         var id;
         var secret;
         var username = user.displayName;
-        var steamInfo = {
-          id: user.id,
-          avatar: user._json.avatarfull
-        }
 
-        //if steamInfo.id is undefined, the user is from a code or dev login,
-        //  and we always make a new user for them, never reuse,
-        //  so we skip this.
-        var foundUser;
-        if (steamInfo.id) {
-            foundUser = stream.users.findUserBySteamId(steamInfo.id);
+        //if user.id exists, this is a Steam user
+        var isValidSteamUser;
+        if (user.id && user._json) {
+          var steamInfo = {
+            id: user.id,
+            avatar: user._json.avatarfull
+          }
+          isValidSteamUser = stream.users.findUserBySteamId(steamInfo.id);
         }
 
         var userAlreadyExists;
-        if (foundUser) {
-            userAlreadyExists = stream.users.checkCredentials(foundUser.id, foundUser.secret);
+        if (isValidSteamUser) {
+            userAlreadyExists = stream.users.checkCredentials(isValidSteamUser.id, isValidSteamUser.secret);
         } else {
             userAlreadyExists = false;
         }
 
         if (userAlreadyExists){
             //reuse the old info
-            id = foundUser.id;
-            secret = foundUser.secret;
+            id = isValidSteamUser.id;
+            secret = isValidSteamUser.secret;
         } else {
             //generate the user's id and secret
             id = stream.users.getNextUserId();
