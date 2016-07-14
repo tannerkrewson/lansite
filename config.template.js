@@ -23,6 +23,9 @@ Config.autoOPFirstUser = true;
 //Developer Mode: Enables features that are insecure to run in a production situation
 Config.developerMode = false;
 
+//Private Messaging: enable or disable private messaging between users
+Config.privateMessaging = true;
+
 
 //Connect 4 URL: If you would prefer to host it yourself, https://github.com/kevers429/connect4
 Config.connectFourUrl = 'http://kevers429.github.io/connect4/';

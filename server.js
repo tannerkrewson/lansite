@@ -548,6 +548,7 @@ function User(id, secret, username, steamInfo) {
     this.secret = secret;
     this.username = username;
     this.steamInfo = steamInfo;
+    this.canReceivePMs = Config.privateMessaging;
 }
 
 User.prototype.isOnline = function() {
@@ -570,7 +571,8 @@ User.prototype.toStrippedJson = function() {
     id: this.id,
     username: this.username,
     steamInfo: this.steamInfo,
-    isOp: this.isOp
+    isOp: this.isOp,
+    canReceivePMs: this.canReceivePMs
   }
 }
 
@@ -820,6 +822,27 @@ Request.prototype.denyRequest = function(){
 }
 
 
+function MessagingSystem() {}
+
+MessagingSystem.initialize = function(socket, stream) {
+  var self = this;
+  Box.addStaticEventListener('message', socket, stream, function(user, data) {
+    self.sendMessage(data.message, data.userToReceiveMessage.id, user.id, stream);
+  });
+}
+
+MessagingSystem.sendMessage = function(message, idOfUserToReceiveMessage, idOfUserWhoSentMessage, stream) {
+  var userToReceiveMessage = stream.users.findUser(idOfUserToReceiveMessage);
+  var userWhoSentMessage = stream.users.findUser(idOfUserWhoSentMessage);
+  if (userToReceiveMessage && userToReceiveMessage.canReceivePMs) {
+    userToReceiveMessage.socket.emit('message', {
+      userWhoSentMessage: userWhoSentMessage.toStrippedJson(),
+      message: message
+    })
+  }
+}
+
+
 
 //
 //  MAIN CODE
@@ -844,6 +867,10 @@ io.on('connection', function(socket) {
             //check to see if we should set the user to OP
             if (Config.autoOPFirstUser && mainStream.users.list.length === 1) {
                 user.op();
+            }
+
+            if (Config.privateMessaging) {
+              MessagingSystem.initialize(socket, mainStream);
             }
 
             mainStream.prepNewUser(user.id);

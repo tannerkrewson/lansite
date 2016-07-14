@@ -101,7 +101,6 @@ Sidebar.prototype.updateUsers = function() {
     this.users.forEach(function(user) {
 
         /* Create the info popup for this user */
-
         var username = user.username;
         if (user.isOp) {
             username += ' [Admin]';
@@ -110,12 +109,11 @@ Sidebar.prototype.updateUsers = function() {
         user.showInfoPopup = function() {
           var swalJson = {
               title: username,
-              //type: "input",
-              showCancelButton: true,
-              closeOnConfirm: false,
+              text: '',
               html: true
           };
 
+          //if the user is a Steam user
           if (user.steamInfo) {
             swalJson.imageUrl = user.steamInfo.avatar;
             swalJson.text = 'Click <a href="';
@@ -124,23 +122,34 @@ Sidebar.prototype.updateUsers = function() {
           }
 
           //if pm's are enabled, and this user is not us
-          //swalJson.text += '<br>Send them a private message:<br>';
+          if (user.canReceivePMs && user.id !== parseInt(Cookies.get('id'))) {
+            swalJson.text += '<br>Send them a private message:<br>';
+            swalJson.type = 'input';
+            swalJson.showCancelButton = true;
+            swalJson.closeOnConfirm = false;
 
-          var swalOnSubmit = function(inputValue) {
-              if (inputValue === false) return false;
-              if (inputValue === "") {
-                  swal.showInputError("Your message can't be blank!");
-                  return false
-              }
-              if (inputValue.length > 255) {
-                  swal.showInputError("Your message is too long!");
-                  return false
-              }
-              swal("Message sent to " + user.username, "You wrote: " + inputValue, "success");
-          };
+            //show the popup
+            swal(swalJson, function(inputValue) {
+                if (inputValue === false) return false;
+                if (inputValue === "") {
+                    swal.showInputError("Your message can't be blank!");
+                    return false
+                }
+                if (inputValue.length > 255) {
+                    swal.showInputError("Your message is too long!");
+                    return false
+                }
 
-          //show the popup
-          swal(swalJson, swalOnSubmit);
+                SendToServer.generic('message', {
+                  userToReceiveMessage: user,
+                  message: inputValue
+                });
+                swal("Message sent to " + user.username, "You wrote: " + inputValue, "success");
+            });
+          } else {
+            //show the popup
+            swal(swalJson);
+          }
         }
 
         /* Add the user to the Sidebar */
@@ -151,8 +160,6 @@ Sidebar.prototype.updateUsers = function() {
                 )));
     });
 };
-
-Sidebar
 
 Sidebar.prototype.clearUsers = function() {
     $('#sidebar ul').empty();
@@ -409,4 +416,25 @@ socket.on('reconnect', function(msg) {
 
 socket.on('failed', function(msg) {
     window.location.href = '/';
+});
+
+socket.on('message', function(msg) {
+  swal({
+    title: msg.userWhoSentMessage.username + " says:",
+    text: msg.message,
+    showCancelButton: true,
+    cancelButtonText: 'Close',
+    confirmButtonText: "Reply",
+    closeOnConfirm: false
+  }, function() {
+    //find the user who sent this message
+    for (var i = 0; i < mainSidebar.users.length; i++) {
+      //if our user id is equal to the one in the list
+      if (msg.userWhoSentMessage.id === mainSidebar.users[i].id) {
+        mainSidebar.users[i].showInfoPopup();
+        break;
+      }
+    }
+    msg.userWhoSentMessage
+  });
 });
