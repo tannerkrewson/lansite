@@ -268,15 +268,18 @@ Stream.prototype.initializeSteamLogin = function() {
 
         var id;
         var secret;
-        var username = req.user.displayName;
-        var steamId = req.user.id;
+        var username = user.displayName;
+        var steamInfo = {
+          id: user.id,
+          avatar: user._json.avatarfull
+        }
 
-        //if steamId is undefined, the user is from a code or dev login,
+        //if steamInfo.id is undefined, the user is from a code or dev login,
         //  and we always make a new user for them, never reuse,
         //  so we skip this.
         var foundUser;
-        if (steamId) {
-            foundUser = stream.users.findUserBySteamId(steamId);
+        if (steamInfo.id) {
+            foundUser = stream.users.findUserBySteamId(steamInfo.id);
         }
 
         var userAlreadyExists;
@@ -290,7 +293,6 @@ Stream.prototype.initializeSteamLogin = function() {
             //reuse the old info
             id = foundUser.id;
             secret = foundUser.secret;
-            steamId = foundUser.steamId;
         } else {
             //generate the user's id and secret
             id = stream.users.getNextUserId();
@@ -298,7 +300,7 @@ Stream.prototype.initializeSteamLogin = function() {
         }
 
         //add the user to the stream and await their return
-        stream.users.addOrUpdateUserInfo(secret, id, username, steamId);
+        stream.users.addOrUpdateUserInfo(secret, id, username, steamInfo);
 
         //set a cookie that allows the user to know its own id
         res.cookie('id', id, {
@@ -385,13 +387,13 @@ function Users() {
     this.userCount = 0;
 }
 
-Users.prototype.addOrUpdateUserInfo = function(secret, id, username, steamId) {
+Users.prototype.addOrUpdateUserInfo = function(secret, id, username, steamInfo) {
     //if this user already exists
     var element = this.checkCredentials(id, secret);
     if (element) {
         //update their info
         element.username = username;
-        element.steamId = steamId;
+        element.steamInfo = steamInfo;
 
         //should already be null, just precautionary
         element.socket = null;
@@ -399,7 +401,7 @@ Users.prototype.addOrUpdateUserInfo = function(secret, id, username, steamId) {
     }
 
     //ran if the user does not already exist
-    var tempUser = new User(id, secret, username, steamId);
+    var tempUser = new User(id, secret, username, steamInfo);
     this.list.push(tempUser);
     return tempUser;
 }
@@ -427,7 +429,7 @@ Users.prototype.findUser = function(id) {
 
 Users.prototype.findUserBySteamId = function(steamId) {
   for (element of this.list) {
-      if (element.steamId === steamId) {
+      if (element.steamInfo.id === steamId) {
           return element;
       }
   }
@@ -540,14 +542,14 @@ Users.prototype.getNextUserId = function() {
 
 
 
-function User(id, secret, username, steamId) {
+function User(id, secret, username, steamInfo) {
     this.socket = null;
     this.isOp = false;
 
     this.id = id;
     this.secret = secret;
     this.username = username;
-    this.steamId = steamId; //should be null if not a steam account
+    this.steamInfo = steamInfo;
 }
 
 User.prototype.isOnline = function() {
@@ -569,7 +571,7 @@ User.prototype.toStrippedJson = function() {
   return {
     id: this.id,
     username: this.username,
-    steamId: this.steamId,
+    steamInfo: this.steamInfo,
     isOp: this.isOp
   }
 }

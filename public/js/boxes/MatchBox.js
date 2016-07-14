@@ -36,7 +36,7 @@ MatchBox.prototype.show = function() {
 
     //prevent multiple click events from being binded
     button.off('click');
-    
+
     button.on('click', function(event) {
         console.log('click!');
         //get the title from the input box
@@ -187,7 +187,7 @@ MatchBox.prototype.updateMatchCounter = function(match) {
             //append the string to the list
             thisDropdown.append(
                 $('<li>').append(
-                    $('<a>').attr('href', 'http://steamcommunity.com/profiles/' + user.steamId).append(
+                    $('<a>').attr('href', 'http://steamcommunity.com/profiles/' + user.steamInfo.id).append(
                         $('<span>').attr('class', 'tab').append(username)
                     )));
         });

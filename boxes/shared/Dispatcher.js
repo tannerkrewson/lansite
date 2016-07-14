@@ -82,12 +82,7 @@ Dispatcher.sendUserListToAll = function(users) {
 	users.list.forEach(function(element) {
 		//if the user is online
 		if (element.socket !== null) {
-			tempList.push({
-				id: element.id,
-				steamId: element.steamId,
-				username: element.username,
-				isOp: element.isOp
-			})
+			tempList.push(element.toStrippedJson());
 		}
 	});
 	users.list.forEach(function(element) {

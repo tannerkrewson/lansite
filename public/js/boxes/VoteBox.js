@@ -212,7 +212,7 @@ VoteBox.prototype.updateChoiceVotes = function(choice) {
             //append the string to the list
             thisDropdown.append(
                 $('<li>').append(
-                    $('<a>').attr('href', 'http://steamcommunity.com/profiles/' + user.steamId).append(
+                    $('<a>').attr('href', 'http://steamcommunity.com/profiles/' + user.steamInfo.id).append(
                         $('<span>').attr('class', 'tab').append(username)
                     )));
         });

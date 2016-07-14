@@ -107,8 +107,8 @@ Sidebar.prototype.updateUsers = function() {
 
         //prevent non-steam users from having a broken url
         var steamUrl = '';
-        if (user.steamId) {
-          steamUrl = 'http://steamcommunity.com/profiles/' + user.steamId;
+        if (user.steamInfo.id) {
+          steamUrl = 'http://steamcommunity.com/profiles/' + user.steamInfo.id;
         } else {
           steamUrl = 'javascript:swal("' + user.username + ' does not have a Steam profile.", "", "warning");';
         }
