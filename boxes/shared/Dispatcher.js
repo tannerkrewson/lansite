@@ -8,11 +8,11 @@ var Config = require('../../config.js');
 function Dispatcher() {}
 
 Dispatcher.sendStream = function(boxes, userToReceiveStream) {
-	userToReceiveStream.socket.emit('newStream', boxes);
+	Dispatcher.sendStreamToSocket(boxes, userToReceiveStream.socket);
 }
 
 Dispatcher.sendStreamToSocket = function(boxes, socket) {
-	socket.emit('newStream', boxes);
+	Dispatcher.sendToUser(socket, 'newStream', boxes);
 }
 
 Dispatcher.sendStreamToAll = function(boxes, users) {
@@ -26,26 +26,11 @@ Dispatcher.sendStreamToAll = function(boxes, users) {
 }
 
 Dispatcher.sendNewBoxToAll = function(box, users) {
-	//loop through all users
-	users.list.forEach(function(element) {
-		if (element.socket !== null) {
-			element.socket.emit('newBox', box);
-		}
-	});
-	if (Config.developerMode)
-		console.log('Sent new ' + box.id + ' to all');
+	Dispatcher.sendToAllUsers(users.list, 'newBox', box, 'Sent new ' + box.id + ' to all');
 }
 
 Dispatcher.sendUpdatedBoxToAll = function(box, users) {
-
-	//TODO: Make sure the box passed is NOT a new box
-	users.list.forEach(function(element) {
-		if (element.socket !== null) {
-			element.socket.emit('updateBox', box);
-		}
-	});
-	if (Config.developerMode)
-		console.log('Sent updated ' + box.id + ' to all');
+	Dispatcher.sendToAllUsers(users.list, 'updateBox', box, 'Sent updated ' + box.id + ' to all')
 }
 
 Dispatcher.attachListenersToUser = function(user, box, stream) {
@@ -85,13 +70,24 @@ Dispatcher.sendUserListToAll = function(users) {
 			tempList.push(element.toStrippedJson());
 		}
 	});
-	users.list.forEach(function(element) {
-		if (element.socket !== null) {
-			element.socket.emit('updateUsers', tempList);
+
+	Dispatcher.sendToAllUsers(users.list, 'updateUsers', tempList, 'Sent user list to all');
+}
+
+Dispatcher.sendToAllUsers = function(userList, event, data, devLogMessage) {
+	userList.forEach(function(user) {
+		if (user.socket !== null) {
+			Dispatcher.sendToUser(user.socket, event, data);
 		}
 	});
-	if (Config.developerMode)
-		console.log('Sent user list to all');
+
+	if (devLogMessage && Config.developerMode) {
+		console.log(devLogMessage);
+	}
+}
+
+Dispatcher.sendToUser = function(socket, event, data) {
+	socket.emit(event, data);
 }
 
 module.exports = Dispatcher;
