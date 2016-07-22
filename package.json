@@ -1,6 +1,6 @@
 {
   "name": "lansite",
-  "version": "0.0.1",
+  "version": "0.4.0",
   "description": "Lansite is web app made for smaller LAN parties. It is designed to be a simple, central information hub for all attendees.",
   "main": "server.js",
   "dependencies": {
