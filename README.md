@@ -1,6 +1,6 @@
 # Lansite
 
-Lansite is web app made for smaller LAN parties. It is designed to be a simple, central information hub for all attendees.
+Lansite is a web app made for smaller LAN parties. It is designed to be a simple, central information hub for all attendees.
 
 ![](https://cdn.pbrd.co/images/1BO4o3dm.png)![](https://cdn.pbrd.co/images/1BO5ubtv.png)
 
@@ -11,7 +11,7 @@ Lansite is web app made for smaller LAN parties. It is designed to be a simple, 
 * Attendees can read messages, vote in polls, and find people to play games with
 * Find the Steam profiles of other attendees using the sidebar
 * Request to post messages or votes using the buttons in the sidebar
-* Find an opponent to play [an in-browser Connect 4 game](https://github.com/kevers429/connect4) designed by myself and [kevers429](https://github.com/kevers429/).
+* Find an opponent to play [an in-browser Connect 4 game](https://github.com/kevers429/connect4) designed by myself and [kevers429](https://github.com/kevers429/)
 
 ####For the Admins:
 * Easy to install, configure and launch
@@ -23,14 +23,30 @@ Lansite is web app made for smaller LAN parties. It is designed to be a simple, 
 * Programmed with JavaScript and Bootstrap on the front end and NodeJS with Express, Socket.io, Handlebars, and Passport on the back end
 * Fully modular plugin system that allows easy creation of custom plugins, called "Boxes"
 
+## Disadvantages
+To make setup easy, Lansite does not use a database. This means that when the Lansite server is stopped, all data, including boxes and users, is lost.
+Also, Lansite is meant to be used on-site, at the LAN itself. Lansite would not be useful as an event planning/organization tool.
+If you are interested in LAN management software that does not have the disadvantages that Lansite has, I have listed a few of my favorites below.
+
+#### Alternatives:
+* [Lanager](https://github.com/zeropingheroes/lanager)
+* [LANREG](https://www.lanreg.org/)
+* [LanHUB](https://lanhub.net/)
+
 ## Install
-1. Clone this repo however you prefer. If you prefer more stability, clone from the [latest release](https://github.com/tannerkrewson/Lansite/releases).
+
+#### Prerequisites
+* [Node.js](https://nodejs.org/)
+
+#### Instructions
+1. [Clone this repo](https://help.github.com/articles/cloning-a-repository/) however you prefer. If you prefer more stability, clone from the [latest release](https://github.com/tannerkrewson/Lansite/releases).
 2. Make sure you have [Node.js](https://nodejs.org/) installed on your system.
-2. Open CMD and run: `npm install`.
+2. Open CMD/Terminal/Bash in the directory in which you installed Lansite.
+3. Run this command: `npm install`.
 3. Make a copy of `config.template.js` called `config.js`.
-4. Change the settings in config.js to your liking.
+4. Change the settings in `config.js` to your liking.
 5. Finally, to open the server, run: `npm start`.
-6. Visit localhost:port in your browser to test.
+6. Visit `localhost:port` in your browser to test.
 
 ## Config
 * Web Address (string): url server will append to redirects.
