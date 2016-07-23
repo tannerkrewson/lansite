@@ -39,14 +39,13 @@ If you are interested in LAN management software that does not have the disadvan
 * [Node.js](https://nodejs.org/)
 
 #### Instructions
-1. [Clone this repo](https://help.github.com/articles/cloning-a-repository/) however you prefer. If you prefer more stability, clone from the [latest release](https://github.com/tannerkrewson/Lansite/releases).
-2. Make sure you have [Node.js](https://nodejs.org/) installed on your system.
+1. [Clone this repo](https://help.github.com/articles/cloning-a-repository/) however you prefer. If you prefer more stability, download an archive from the [latest release](https://github.com/tannerkrewson/Lansite/releases), and extract it.
 2. Open CMD/Terminal/Bash in the directory in which you installed Lansite.
 3. Run this command: `npm install`.
-3. Make a copy of `config.template.js` called `config.js`.
-4. Change the settings in `config.js` to your liking.
-5. Finally, to open the server, run: `npm start`.
-6. Visit `localhost:port` in your browser to test.
+4. Make a copy of `config.template.js` called `config.js`.
+5. Change the settings in `config.js` to your liking.
+6. Finally, to open the server, run: `npm start`.
+7. Visit `localhost:port` in your browser to test.
 
 ## Config
 * Web Address (string): url server will append to redirects.
