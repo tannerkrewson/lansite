@@ -80,7 +80,7 @@ VoteBox.prototype.addChoices = function(choicesArray){
 }
 
 VoteBox.prototype.addChoice = function(choiceName){
-	this.choices.push(new VoteBoxChoice(choiceName));
+	this.choices.push(new VoteBoxChoice(choiceName.trim()));
 }
 
 VoteBox.prototype.getIndexOfChoiceByUnique = function(unique) {
