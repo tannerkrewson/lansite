@@ -2,24 +2,24 @@
 
 Lansite is a web app made for smaller LAN parties. It is designed to be a simple, central information hub for all attendees.
 
-![](https://cdn.pbrd.co/images/1BO4o3dm.png)![](https://cdn.pbrd.co/images/1BO5ubtv.png)
+<img src="https://cdn.pbrd.co/images/1BO4o3dm.png" width="366"/>
 
 ## Features
 
-####For the Attendees:
+#### For the Attendees:
 * Uses Steam accounts to login, so no registration required
 * Attendees can read messages, vote in polls, and find people to play games with
 * Find the Steam profiles of other attendees using the sidebar
 * Request to post messages or votes using the buttons in the sidebar
 * Find an opponent to play [an in-browser Connect 4 game](https://github.com/kevers429/connect4) designed by myself and [kevers429](https://github.com/kevers429/)
 
-####For the Admins:
+#### For the Admins:
 * Easy to install, configure and launch
 * Requests from the attendees can be approved or denied from the Admin Stream to prevent spam
 * Add messages or votes easily using the buttons in the sidebar
 * If someone doesn't have a Steam account, or your LAN does not have internet, you can create one-time use login codes to give to each attendee
 
-####For programmers:
+#### For programmers:
 * Programmed with JavaScript and Bootstrap on the front end and NodeJS with Express, Socket.io, Handlebars, and Passport on the back end
 * Fully modular plugin system that allows easy creation of custom plugins, called "Boxes"
 
