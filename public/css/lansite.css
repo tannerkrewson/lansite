@@ -27,6 +27,10 @@ body {
   margin-left: 0px !important;
 }
 
+.navbar-brand {
+  font-weight: bold;
+}
+
 /* collapsed sidebar styles */
 @media screen and (max-width: 767px) {
   .row-offcanvas {
