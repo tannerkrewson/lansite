@@ -52,7 +52,7 @@ Connect4Box.prototype.show = function() {
         });
 
         //open connect 4 as host
-        var url = self.url + '?host=' + c4id;
+        var url = self.url + '?createid=' + c4id;
         var win = window.open(url, '_blank');
         win.focus();
     });
@@ -142,7 +142,7 @@ Connect4Box.prototype.drawMatches = function() {
                     }
 
                     //join the connect 4 match
-                    var url = self.url + '?join=' + matchC4id + usernameArg;
+                    var url = self.url + '?joinid=' + matchC4id + usernameArg;
                     var win = window.open(url, '_blank');
                     win.focus();
                 });
