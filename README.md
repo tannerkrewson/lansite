@@ -2,7 +2,7 @@
 
 Lansite is a web app made for smaller LAN parties. It is designed to be a simple, central information hub for all attendees.
 
-<img src="https://cdn.pbrd.co/images/1BO4o3dm.png" width="366"/>
+<img src="https://i.imgur.com/dxLNnED.png" width="366"/>
 
 ## Features
 
@@ -11,7 +11,7 @@ Lansite is a web app made for smaller LAN parties. It is designed to be a simple
 * Attendees can read messages, vote in polls, and find people to play games with
 * Find the Steam profiles of other attendees using the sidebar
 * Request to post messages or votes using the buttons in the sidebar
-* Find an opponent to play [an in-browser Connect 4 game](https://github.com/kevers429/connect4) designed by myself and [kevers429](https://github.com/kevers429/)
+* Find an opponent to play [an in-browser Connect 4 game](https://github.com/kevin-shannon/connect4) designed by myself and [Kevin Shannon](https://github.com/kevin-shannon)
 
 #### For the Admins:
 * Easy to install, configure and launch
@@ -39,13 +39,13 @@ If you are interested in LAN management software that does not have the disadvan
 * [Node.js](https://nodejs.org/)
 
 #### Instructions
-1. [Clone this repo](https://help.github.com/articles/cloning-a-repository/) however you prefer. If you prefer more stability, download an archive from the [latest release](https://github.com/tannerkrewson/Lansite/releases), and extract it.
+1. [Clone this repo](https://help.github.com/articles/cloning-a-repository/) however you prefer.
 2. Open CMD/Terminal/Bash in the directory in which you installed Lansite.
 3. Run this command: `npm install`.
 4. Make a copy of `config.template.js` called `config.js`.
 5. Change the settings in `config.js` to your liking.
 6. Finally, to open the server, run: `npm start`.
-7. Visit `localhost:port` in your browser to test.
+7. Visit `localhost:PORT` in your browser to test.
 
 ## Config
 * Web Address (string): url server will append to redirects.
@@ -54,9 +54,9 @@ If you are interested in LAN management software that does not have the disadvan
   Features:
   * Non-Steam accounts for testing: When dev mode is enabled, just enter a username with no code on the login page.
   * More console messages
-* Steam API Key (string): Required. Grab one for yourself [here](http://steamcommunity.com/dev/apikey).
+* Steam API Key (string): Allow your attendees to login to Lansite with their Steam account. Grab an API key for yourself [here](http://steamcommunity.com/dev/apikey).
 * Auto OP First User (boolean): Make the first user that logs into Lansite the admin
-* Connect 4 Url (string): Should point to a Connect 4 game programmed by myself and [kevers429](https://github.com/kevers429/). You can find the GitHub repo  [here](https://github.com/kevers429/connect4), or try the game out for yourself [here](http://kevers429.github.io/connect4/).
+* Connect 4 Url (string): Should point to `https://kevinshannon.dev/connect4/`, or another instance of [this repo](https://github.com/kevin-shannon/connect4).
 
 ## Server Console Commands
 * `help`: View a list of commands
