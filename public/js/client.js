@@ -290,7 +290,7 @@ SendToServer.areAllPostsAllowed = function(){
 function Popup() {}
 
 Popup.requestSent = function() {
-    //don't annoy the admins with constant popups
+    //don't show popup when user is admin or all posts are allowed
     if (!isThisUserOP) {
         if(!allPostsAreAllowed) {
             swal("Request sent!", "Now, wait for the admin to respond.", "success");
