@@ -29,6 +29,7 @@ Config.privateMessaging = true;
 //Connect 4 URL: If you would prefer to host it yourself, https://github.com/tannerkrewson/connect4lansite
 Config.connectFourUrl = 'https://kevinshannon.dev/connect4/';
 
-Config.allowAllPosts = true;
+//Automatically accept all posts
+Config.allowAllPosts = false;
 
 module.exports = Config;
