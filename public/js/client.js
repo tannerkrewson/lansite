@@ -13,6 +13,7 @@ var socket = io();
 //  if the user is OP. this flag is just for cosmetics, which won't
 //  do anything if the user isn't OP, because the server won't allow it.
 var isThisUserOP = false;
+var allPostsAreAllowed= false;
 
 //will contain all the loaded client boxes
 var BoxNames = [];
@@ -282,13 +283,18 @@ SendToServer.areWeOP = function(){
     SendToServer.generic('areWeOP', {});
 }
 
+SendToServer.areAllPostsAllowed = function(){
+    SendToServer.generic('areAllPostsAllowed', {});
+}
 
 function Popup() {}
 
 Popup.requestSent = function() {
     //don't annoy the admins with constant popups
     if (!isThisUserOP) {
-        swal("Request sent!", "Now, wait for the admin to respond.", "success");
+        if(!allPostsAreAllowed) {
+            swal("Request sent!", "Now, wait for the admin to respond.", "success");
+        }
     }
 }
 
@@ -345,6 +351,9 @@ socket.on('newStream', function(msg) {
     //see if we are op
     SendToServer.areWeOP();
 
+    SendToServer.areAllPostsAllowed();
+
+
     //deletes all boxes currently in the array
     mainStream.clearArray();
 
@@ -387,6 +396,15 @@ socket.on('areWeOP', function(msg) {
 
         //redraw all boxes with the X
         mainStream.redrawAllBoxes();
+    }
+});
+
+socket.on('areAllPostsAllowed', function(msg) {
+    allowCheck = msg && true;
+    //if we're not already OP
+
+    if (!allPostsAreAllowed && allowCheck){
+        allPostsAreAllowed = true;
     }
 });
 
