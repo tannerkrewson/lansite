@@ -353,7 +353,6 @@ socket.on('newStream', function(msg) {
 
     SendToServer.areAllPostsAllowed();
 
-
     //deletes all boxes currently in the array
     mainStream.clearArray();
 
