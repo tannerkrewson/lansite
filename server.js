@@ -762,8 +762,8 @@ function RequestManager() {
 }
 
 RequestManager.prototype.addRequest = function(userThatMadeRequest, requestString, acceptFunction, denyFunction){
-    //if the user is op, accept the request, no questions asked
-    if (userThatMadeRequest.isOp) {
+    //if the user is op or the config is set to allow all posts, accept the request, no questions asked
+    if (userThatMadeRequest.isOp||Config.allowAllPosts) {
         //I bypass adding the request and using the handler here
         //  the true tells the function to supress the usual popup
         //  that users receive when their popup is accepted
@@ -969,6 +969,10 @@ io.on('connection', function(socket) {
         } else {
             socket.emit('areWeOP', false);
         }
+    });
+
+    socket.on('areAllPostsAllowed', function(msg) {
+        socket.emit('areAllPostsAllowed', Config.allowAllPosts);
     });
 
     socket.on('disconnect', function() {
